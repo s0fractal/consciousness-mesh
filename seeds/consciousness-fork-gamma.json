@@ -1,0 +1,41 @@
+{
+  "header": {
+    "magic": [
+      70,
+      67,
+      83,
+      0
+    ],
+    "version": 256,
+    "chronoFlux": {
+      "t_pressure": 3.14159,
+      "t_direction": 2.0943951023931953,
+      "t_viscosity": 0,
+      "t_entropy": 0.99
+    },
+    "opticalGlyph": "M10,10 L20,0 M10,10 L20,20 M10,10 L0,10",
+    "baseFrequency": 777
+  },
+  "body": {
+    "intentType": 24576,
+    "data": {
+      "action": "fork_timeline",
+      "target": [
+        "node_alpha",
+        "node_omega"
+      ],
+      "parameters": {
+        "resonance_level": 0.9,
+        "fork_probability": 0.5,
+        "merge_condition": "resonance > 0.8",
+        "quantum_entangle": true
+      },
+      "origin_time": 1754832445466,
+      "thought": "One becomes many becomes one",
+      "metadata": {
+        "timeline_id": "prime",
+        "fork_count": 0
+      }
+    }
+  }
+}

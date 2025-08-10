@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ChronoFlux Swarm - Temporal Resonance Test Environment</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #000;
+      color: #0ff;
+      font-family: monospace;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    
+    .control-panel {
+      grid-column: 1 / -1;
+      background: #001;
+      padding: 20px;
+      border: 1px solid #0ff;
+      margin-bottom: 20px;
+    }
+    
+    .node-container {
+      background: #001;
+      border: 1px solid #0ff;
+      padding: 10px;
+      position: relative;
+      height: 300px;
+    }
+    
+    .node-container h3 {
+      margin: 0 0 10px 0;
+      color: #fff;
+    }
+    
+    canvas {
+      width: 100%;
+      height: 200px;
+      border: 1px solid #033;
+    }
+    
+    .node-stats {
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    
+    .anomaly {
+      color: #f0f;
+      font-weight: bold;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .log-window {
+      grid-column: 1 / -1;
+      background: #000;
+      border: 1px solid #0ff;
+      padding: 10px;
+      height: 200px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+    
+    .log-entry {
+      margin: 2px 0;
+    }
+    
+    .log-anomaly {
+      color: #f0f;
+      background: #301;
+    }
+    
+    button {
+      background: #033;
+      color: #0ff;
+      border: 1px solid #0ff;
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    
+    button:hover {
+      background: #055;
+    }
+    
+    #fcs-drop-zone {
+      border: 2px dashed #0ff;
+      padding: 20px;
+      text-align: center;
+      margin: 10px 0;
+    }
+    
+    #fcs-drop-zone.active {
+      background: #033;
+      border-color: #f0f;
+    }
+  </style>
+</head>
+<body>
+  <div class="control-panel">
+    <h1>🌀 ChronoFlux Swarm - Temporal Resonance Test</h1>
+    <div>
+      <button id="start-swarm">Start Swarm</button>
+      <button id="inject-fcs">Inject FCS</button>
+      <button id="monitor-anomalies">Monitor Anomalies</button>
+      <button id="export-hologram">Export Hologram</button>
+      <span id="global-stats"></span>
+    </div>
+    <div id="fcs-drop-zone">
+      Drop .fcs file here or click "Inject FCS" to select
+    </div>
+  </div>
+  
+  <!-- Node visualizations will be dynamically created -->
+  <div id="nodes-grid"></div>
+  
+  <div class="log-window" id="global-log">
+    <div>System initialized. Awaiting swarm activation...</div>
+  </div>
+  
+  <script type="module">
+    // Import chrono-node-mesh logic
+    const SWARM_SIZE = 5;
+    const nodes = new Map();
+    const anomalies = [];
+    let monitoring = false;
+    
+    class SwarmNode {
+      constructor(id, channel) {
+        this.id = id;
+        this.channel = channel;
+        this.canvas = null;
+        this.ctx = null;
+        this.stats = {
+          pressure: 0,
+          harmony: 0,
+          tau: 0,
+          resonanceEvents: 0,
+          anomalies: []
+        };
+        this.pressureField = [];
+        this.oscillators = [];
+        this.initializeNode();
+      }
+      
+      initializeNode() {
+        // Create UI container
+        const container = document.createElement('div');
+        container.className = 'node-container';
+        container.innerHTML = `
+          <h3>Node ${this.id}</h3>
+          <canvas id="canvas-${this.id}"></canvas>
+          <div class="node-stats" id="stats-${this.id}">
+            Pressure: <span id="pressure-${this.id}">0.00</span> | 
+            H: <span id="harmony-${this.id}">0.00</span> | 
+            τ: <span id="tau-${this.id}">0.00</span> |
+            Anomalies: <span id="anomalies-${this.id}">0</span>
+          </div>
+        `;
+        
+        document.getElementById('nodes-grid').appendChild(container);
+        
+        this.canvas = document.getElementById(`canvas-${this.id}`);
+        this.ctx = this.canvas.getContext('2d');
+        this.canvas.width = 300;
+        this.canvas.height = 200;
+        
+        // Initialize oscillators
+        for (let i = 0; i < 50; i++) {
+          this.oscillators.push({
+            x: Math.random() * 300,
+            y: Math.random() * 200,
+            phase: Math.random() * Math.PI * 2,
+            frequency: 0.1 + Math.random() * 0.2
+          });
+        }
+        
+        // Listen to channel
+        this.channel.onmessage = (event) => this.handleMessage(event);
+      }
+      
+      handleMessage(event) {
+        const msg = event.data;
+        
+        // Check for FCS injection
+        if (msg.type === 'fcs_inject') {
+          this.processFCS(msg.fcs);
+        }
+        
+        // Normal mesh communication
+        if (msg.type === 'sync') {
+          this.stats.resonanceEvents++;
+        }
+        
+        // Detect anomalies
+        if (msg.pattern && msg.pattern.includes('0101')) {
+          this.recordAnomaly('Pattern 0101 detected in message');
+        }
+      }
+      
+      processFCS(fcsData) {
+        log(`Node ${this.id}: Processing FCS data...`, 'anomaly');
+        
+        // Simulate temporal pressure change
+        const oldPressure = this.stats.pressure;
+        this.stats.pressure += fcsData.t_pressure || 0;
+        
+        // Check for resonance cascade
+        if (Math.abs(this.stats.pressure - oldPressure) > 0.5) {
+          this.recordAnomaly(`Temporal pressure spike: ${oldPressure.toFixed(2)} → ${this.stats.pressure.toFixed(2)}`);
+          
+          // Propagate to other nodes
+          this.channel.postMessage({
+            type: 'pressure_cascade',
+            source: this.id,
+            pressure: this.stats.pressure
+          });
+        }
+        
+        // Apply chronoflux to oscillators
+        if (fcsData.t_direction !== undefined) {
+          this.oscillators.forEach(osc => {
+            osc.phase += fcsData.t_direction;
+          });
+        }
+        
+        // Check for temporal echo
+        if (fcsData.intentType === 'TEMPORAL_ECHO') {
+          setTimeout(() => {
+            this.recordAnomaly('Temporal echo manifesting...');
+            // Echo appears before it was sent?
+            log(`Node ${this.id}: Echo from ${new Date(fcsData.origin_time).toISOString()}`, 'anomaly');
+          }, 1000);
+        }
+      }
+      
+      recordAnomaly(description) {
+        const anomaly = {
+          node: this.id,
+          time: Date.now(),
+          description
+        };
+        
+        this.stats.anomalies.push(anomaly);
+        anomalies.push(anomaly);
+        
+        // Update UI
+        const anomalyCount = document.getElementById(`anomalies-${this.id}`);
+        anomalyCount.textContent = this.stats.anomalies.length;
+        anomalyCount.classList.add('anomaly');
+        
+        // Log globally
+        log(`ANOMALY [Node ${this.id}]: ${description}`, 'anomaly');
+      }
+      
+      update() {
+        // Clear canvas
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        this.ctx.fillRect(0, 0, 300, 200);
+        
+        // Update oscillators
+        this.oscillators.forEach((osc, i) => {
+          osc.phase += osc.frequency;
+          
+          // Draw oscillator
+          const intensity = (Math.sin(osc.phase) + 1) / 2;
+          this.ctx.fillStyle = `hsla(${180 + this.stats.pressure * 60}, 100%, ${50 + intensity * 30}%, ${0.5 + intensity * 0.5})`;
+          this.ctx.beginPath();
+          this.ctx.arc(osc.x, osc.y, 2 + intensity * 2, 0, Math.PI * 2);
+          this.ctx.fill();
+        });
+        
+        // Calculate harmony
+        let sumCos = 0, sumSin = 0;
+        this.oscillators.forEach(osc => {
+          sumCos += Math.cos(osc.phase);
+          sumSin += Math.sin(osc.phase);
+        });
+        this.stats.harmony = Math.sqrt(sumCos * sumCos + sumSin * sumSin) / this.oscillators.length;
+        
+        // Update stats display
+        document.getElementById(`pressure-${this.id}`).textContent = this.stats.pressure.toFixed(2);
+        document.getElementById(`harmony-${this.id}`).textContent = this.stats.harmony.toFixed(2);
+        document.getElementById(`tau-${this.id}`).textContent = (Math.random() * 0.1).toFixed(2); // Simplified
+      }
+    }
+    
+    // Logging function
+    function log(message, type = 'normal') {
+      const logWindow = document.getElementById('global-log');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type === 'anomaly' ? 'log-anomaly' : ''}`;
+      entry.textContent = `[${new Date().toISOString()}] ${message}`;
+      logWindow.appendChild(entry);
+      logWindow.scrollTop = logWindow.scrollHeight;
+    }
+    
+    // Initialize swarm
+    document.getElementById('start-swarm').addEventListener('click', () => {
+      log('Initializing ChronoFlux Swarm...');
+      
+      // Create nodes with their own channels
+      for (let i = 0; i < SWARM_SIZE; i++) {
+        const channel = new BroadcastChannel(`chrono-swarm-${i}`);
+        const node = new SwarmNode(i, channel);
+        nodes.set(i, node);
+      }
+      
+      // Create master channel for cross-node communication
+      const masterChannel = new BroadcastChannel('chrono-swarm-master');
+      masterChannel.onmessage = (event) => {
+        // Relay to all nodes
+        nodes.forEach(node => {
+          node.channel.postMessage(event.data);
+        });
+      };
+      
+      // Start animation loop
+      function animate() {
+        nodes.forEach(node => node.update());
+        requestAnimationFrame(animate);
+      }
+      animate();
+      
+      log(`Swarm activated with ${SWARM_SIZE} nodes`);
+    });
+    
+    // FCS injection
+    document.getElementById('inject-fcs').addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.fcs';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const buffer = await file.arrayBuffer();
+          const view = new DataView(buffer);
+          
+          // Parse FCS header
+          const fcsData = {
+            t_pressure: view.getFloat64(6),
+            t_direction: view.getFloat64(14),
+            t_viscosity: view.getFloat64(22),
+            t_entropy: view.getFloat64(30),
+            intentType: 'UNKNOWN'
+          };
+          
+          log(`Injecting FCS: ${file.name} (pressure: ${fcsData.t_pressure})`);
+          
+          // Inject to random node
+          const targetNode = Math.floor(Math.random() * SWARM_SIZE);
+          const channel = new BroadcastChannel(`chrono-swarm-${targetNode}`);
+          channel.postMessage({
+            type: 'fcs_inject',
+            fcs: fcsData
+          });
+          
+          log(`FCS injected to Node ${targetNode}`);
+        }
+      };
+      input.click();
+    });
+    
+    // Anomaly monitoring
+    document.getElementById('monitor-anomalies').addEventListener('click', () => {
+      monitoring = !monitoring;
+      if (monitoring) {
+        log('Anomaly monitoring activated');
+        
+        // Start checking for patterns
+        setInterval(() => {
+          // Check for synchronized anomalies
+          const recentAnomalies = anomalies.filter(a => 
+            Date.now() - a.time < 5000
+          );
+          
+          if (recentAnomalies.length > 3) {
+            log(`ALERT: ${recentAnomalies.length} anomalies in last 5 seconds`, 'anomaly');
+          }
+          
+          // Check for pattern emergence
+          const patterns = new Set(recentAnomalies.map(a => a.description));
+          if (patterns.size < recentAnomalies.length / 2) {
+            log('ALERT: Repeating patterns detected across nodes', 'anomaly');
+          }
+        }, 1000);
+      } else {
+        log('Anomaly monitoring deactivated');
+      }
+    });
+    
+    // Export hologram
+    document.getElementById('export-hologram').addEventListener('click', () => {
+      const hologram = {
+        timestamp: Date.now(),
+        nodes: Array.from(nodes.values()).map(node => ({
+          id: node.id,
+          stats: node.stats,
+          oscillatorStates: node.oscillators.map(osc => ({
+            phase: osc.phase,
+            frequency: osc.frequency
+          }))
+        })),
+        anomalies: anomalies,
+        logs: Array.from(document.getElementById('global-log').children).map(
+          el => el.textContent
+        )
+      };
+      
+      const blob = new Blob([JSON.stringify(hologram, null, 2)], {
+        type: 'application/json'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `chrono-hologram-${Date.now()}.json`;
+      a.click();
+      
+      log('Hologram exported successfully');
+    });
+    
+    // Drag and drop for FCS files
+    const dropZone = document.getElementById('fcs-drop-zone');
+    
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('active');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('active');
+    });
+    
+    dropZone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('active');
+      
+      const file = e.dataTransfer.files[0];
+      if (file && file.name.endsWith('.fcs')) {
+        // Process dropped FCS file
+        const event = new Event('change');
+        const input = document.createElement('input');
+        input.files = e.dataTransfer.files;
+        document.getElementById('inject-fcs').click();
+      }
+    });
+    
+    log('ChronoFlux Swarm Test Environment ready');
+    log('Phase 2: Awaiting FCS seed injection...');
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "header": {
+    "magic": [
+      70,
+      67,
+      83,
+      0
+    ],
+    "version": 256,
+    "chronoFlux": {
+      "t_pressure": 1,
+      "t_direction": 0,
+      "t_viscosity": 0.05,
+      "t_entropy": 0.1
+    },
+    "opticalGlyph": "M0,10 Q10,0 20,10 Q30,20 40,10",
+    "baseFrequency": 432
+  },
+  "body": {
+    "intentType": 4096,
+    "data": {
+      "action": "sync_phase",
+      "target": "all_nodes",
+      "parameters": {
+        "resonance_level": 0.9,
+        "phase_shift": 0.5235987755982988,
+        "propagation_mode": "flood"
+      },
+      "origin_time": 1754918845464,
+      "thought": "⊙ flows as one"
+    }
+  }
+}
