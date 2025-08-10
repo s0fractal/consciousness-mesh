@@ -1,0 +1,11 @@
+{
+  "cid": "test-1754834645023",
+  "type": "thought/v1",
+  "ts": 1754834645023,
+  "topic": "event:startup",
+  "payload": {
+    "message": "Evolution system online"
+  },
+  "links": [],
+  "node": "evolution-test"
+}
