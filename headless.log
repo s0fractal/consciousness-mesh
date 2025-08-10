@@ -1,0 +1,14 @@
+🚀 ChronoFlux Headless Runner
+   Usage: node headless-runner.js [room] [nodeCount] [nodeId]
+   Press Ctrl+C to stop
+
+🤖 Headless ChronoFlux Node starting...
+   Room: test-room
+   Node ID: headless-1754834646700
+   Nodes: 50
+🔄 Simulation loop started
+✅ Connected to signaling server
+📊 Event: intent | H: 0.795 | τ: 0.005
+📊 Event: lion_gate | H: 0.982 | τ: 0.000
+🌀 Portal activated!
+💾 Telemetry saved to /Users/chaoshex/Projects/chrono-node-mesh/logs/chrono-headless-1754834646700-1754834646700.json (31 entries)

@@ -1,0 +1,1 @@
+./test-integration.sh: line 29: ./nodes/libp2p-thought-node.ts: Permission denied

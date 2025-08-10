@@ -1,0 +1,9 @@
+🚀 ChronoFlux Signaling Server running on port 8089
+   WebSocket endpoint: ws://localhost:8089
+   Rooms are ephemeral - no persistence
+   Ready for P2P mesh connections...
+
+✅ Peer connected: peer-1
+🏠 peer-1 joined room: p2p-thoughts
+✅ Peer connected: peer-2
+🏠 peer-2 joined room: test-room

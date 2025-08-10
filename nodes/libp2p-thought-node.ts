@@ -5,16 +5,18 @@
  * Minimal P2P node for thought propagation
  */
 
-import { createLibp2p } from "https://esm.sh/@libp2p/libp2p@0.45.0";
-import { tcp } from "https://esm.sh/@libp2p/tcp@7.0.0";
-import { noise } from "https://esm.sh/@chainsafe/libp2p-noise@12.0.0";
-import { mplex } from "https://esm.sh/@libp2p/mplex@8.0.0";
-import { gossipsub } from "https://esm.sh/@chainsafe/libp2p-gossipsub@8.0.0";
-import { bootstrap } from "https://esm.sh/@libp2p/bootstrap@8.0.0";
-import { kadDHT } from "https://esm.sh/@libp2p/kad-dht@9.0.0";
-import { CID } from "https://esm.sh/multiformats@12.0.0/cid";
-import * as dagCBOR from "https://esm.sh/@ipld/dag-cbor@9.0.0";
-import { sha256 } from "https://esm.sh/multiformats@12.0.0/hashes/sha2";
+// Simple P2P simulation without complex dependencies
+// For a real implementation, use proper libp2p setup
+
+interface P2PThought {
+  type: "thought/v1";
+  ts: number;
+  topic: string;
+  payload: any;
+  links: string[];  // Previous thought CIDs
+  node: string;
+  sig?: string;
+}
 
 // Thought interface matching our schema
 interface P2PThought {

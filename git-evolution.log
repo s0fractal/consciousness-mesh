@@ -1,0 +1,14 @@
+🧬 Simple Git Evolution Demo
+
+🧬 Initializing Simple Git Evolution...
+✅ Git repository ready
+🌐 HTTP server listening on :8090
+
+⏳ Git evolution running. Press Ctrl+C to stop.
+   HTTP endpoint: POST http://localhost:8090/thought
+
+📝 Simulating test thoughts...
+📝 Queued thought: test-17548346450... [event:startup]
+
+📝 Processing 1 thoughts...
+✅ Evolution recorded: 1 thoughts
