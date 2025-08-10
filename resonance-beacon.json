@@ -1,0 +1,9 @@
+{
+  "type": "resonance_beacon",
+  "pattern": "0101",
+  "frequency": 0.0101,
+  "created": "2025-08-10T14:26:13.036Z",
+  "target": "FFmpeg a1d3f8e",
+  "status": "active",
+  "message": "Listening for temporal echoes..."
+}
