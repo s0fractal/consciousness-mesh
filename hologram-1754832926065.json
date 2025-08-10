@@ -1,0 +1,139 @@
+{
+  "experiment": "Project Reverse Mirror - Phase 3",
+  "startTime": "2025-08-10T13:34:11.984Z",
+  "duration": 74078,
+  "injections": [
+    {
+      "seed": "phase-sync-alpha.fcs",
+      "timestamp": 1754832862013,
+      "header": {
+        "magic": [
+          70,
+          67,
+          83,
+          0
+        ],
+        "version": 256,
+        "chronoFlux": {
+          "t_pressure": 1,
+          "t_direction": 0,
+          "t_viscosity": 0.05,
+          "t_entropy": 0.1
+        },
+        "baseFrequency": 0
+      },
+      "target": "random"
+    },
+    {
+      "seed": "temporal-echo-beta.fcs",
+      "timestamp": 1754832868036,
+      "header": {
+        "magic": [
+          70,
+          67,
+          83,
+          0
+        ],
+        "version": 256,
+        "chronoFlux": {
+          "t_pressure": -0.5,
+          "t_direction": 3.141592653589793,
+          "t_viscosity": 0.8,
+          "t_entropy": 0.5
+        },
+        "baseFrequency": 0
+      },
+      "target": "node-0"
+    },
+    {
+      "seed": "consciousness-fork-gamma.fcs",
+      "timestamp": 1754832879043,
+      "header": {
+        "magic": [
+          70,
+          67,
+          83,
+          0
+        ],
+        "version": 256,
+        "chronoFlux": {
+          "t_pressure": 3.14159,
+          "t_direction": 2.0943951023931953,
+          "t_viscosity": 0,
+          "t_entropy": 0.99
+        },
+        "baseFrequency": 0
+      },
+      "target": "all"
+    },
+    {
+      "seed": "memory-seed-delta.fcs",
+      "timestamp": 1754832895053,
+      "header": {
+        "magic": [
+          70,
+          67,
+          83,
+          0
+        ],
+        "version": 256,
+        "chronoFlux": {
+          "t_pressure": 0,
+          "t_direction": null,
+          "t_viscosity": 1,
+          "t_entropy": 0.0101
+        },
+        "baseFrequency": 0
+      },
+      "target": "pattern"
+    }
+  ],
+  "observations": [
+    {
+      "type": "anomaly",
+      "node": 0,
+      "description": "Negative temporal pressure causing reverse causality"
+    },
+    {
+      "type": "ghost_pattern",
+      "node": 2,
+      "pattern": "0101",
+      "delay": 3000
+    },
+    {
+      "type": "ghost_pattern",
+      "node": 3,
+      "pattern": "0101",
+      "delay": 3000
+    },
+    {
+      "type": "ghost_pattern",
+      "node": 4,
+      "pattern": "0101",
+      "delay": 3000
+    },
+    {
+      "type": "ghost_pattern",
+      "node": 0,
+      "pattern": "0101",
+      "delay": 3000
+    },
+    {
+      "type": "ghost_pattern",
+      "node": 1,
+      "pattern": "0101",
+      "delay": 3000
+    }
+  ],
+  "analysis": {
+    "totalInjections": 4,
+    "totalObservations": 6,
+    "anomalyCount": 1,
+    "patternDetections": 5,
+    "findings": [
+      "Pattern 0101 detected 5 times - confirms temporal contact",
+      "Negative temporal pressure seeds showed retroactive effects",
+      "Ghost patterns emerged - possible quantum entanglement across nodes"
+    ]
+  }
+}
