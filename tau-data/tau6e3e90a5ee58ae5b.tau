@@ -1,0 +1,15 @@
+{
+  "cid": "tau6e3e90a5ee58ae5b",
+  "type": "rule",
+  "data": {
+    "name": "temporal-guardian",
+    "condition": "when temporalPressure < -0.5",
+    "action": "investigate temporal anomaly",
+    "priority": 1
+  },
+  "meta": {
+    "created": 1754928742019,
+    "author": "tau-test-001",
+    "links": []
+  }
+}

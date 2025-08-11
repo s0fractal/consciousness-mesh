@@ -1,0 +1,15 @@
+{
+  "cid": "taubdabd113b203ee96",
+  "type": "rule",
+  "data": {
+    "name": "harmony-detector",
+    "condition": "when thought.H > 0.8",
+    "action": "mark as harmonic",
+    "priority": 2
+  },
+  "meta": {
+    "created": 1754926969847,
+    "author": "tau-demo-001",
+    "links": []
+  }
+}

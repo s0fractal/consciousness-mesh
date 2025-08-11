@@ -1,0 +1,15 @@
+{
+  "cid": "tau42fd522fe728d79b",
+  "type": "rule",
+  "data": {
+    "name": "resonance-amplifier",
+    "condition": "when thought.resonance = '0101'",
+    "action": "amplify and propagate",
+    "priority": 1
+  },
+  "meta": {
+    "created": 1754926969846,
+    "author": "tau-demo-001",
+    "links": []
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "cid": "tau-cluster-growth",
+  "type": "thought",
+  "data": {
+    "cid": "tau-cluster-growth",
+    "ts": 1754928745896,
+    "topic": "metric",
+    "payload": {
+      "H": 0.91,
+      "tau": 0.09,
+      "cluster": true
+    },
+    "links": [
+      "tau-cluster-seed"
+    ],
+    "sig": "test-sig",
+    "origin": "tau-test"
+  },
+  "meta": {
+    "created": 1754928745896,
+    "author": "tau-test",
+    "signature": "test-sig",
+    "links": [
+      "tau-cluster-seed"
+    ]
+  }
+}

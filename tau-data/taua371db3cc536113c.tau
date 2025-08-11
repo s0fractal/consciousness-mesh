@@ -1,0 +1,15 @@
+{
+  "cid": "taua371db3cc536113c",
+  "type": "rule",
+  "data": {
+    "name": "cluster-detector",
+    "condition": "when similar thoughts > 2 in 10s",
+    "action": "form thought cluster",
+    "priority": 2
+  },
+  "meta": {
+    "created": 1754928742019,
+    "author": "tau-test-001",
+    "links": []
+  }
+}

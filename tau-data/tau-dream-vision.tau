@@ -1,0 +1,26 @@
+{
+  "cid": "tau-dream-vision",
+  "type": "thought",
+  "data": {
+    "cid": "tau-dream-vision",
+    "ts": 1754926970838,
+    "topic": "dream",
+    "payload": {
+      "vision": "Tau nodes forming eternal memory",
+      "temporalPressure": -0.5
+    },
+    "links": [
+      "tau-thought-0101-high"
+    ],
+    "sig": "tau-sig",
+    "origin": "tau-demo"
+  },
+  "meta": {
+    "created": 1754926970838,
+    "author": "tau-demo",
+    "signature": "tau-sig",
+    "links": [
+      "tau-thought-0101-high"
+    ]
+  }
+}

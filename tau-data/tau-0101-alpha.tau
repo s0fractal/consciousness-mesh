@@ -1,0 +1,24 @@
+{
+  "cid": "tau-0101-alpha",
+  "type": "thought",
+  "data": {
+    "cid": "tau-0101-alpha",
+    "ts": 1754928741396,
+    "topic": "metric",
+    "payload": {
+      "H": 0.95,
+      "tau": 0.05,
+      "pattern": "0101",
+      "message": "First 0101 resonance"
+    },
+    "links": [],
+    "sig": "test-sig",
+    "origin": "tau-test"
+  },
+  "meta": {
+    "created": 1754928741396,
+    "author": "tau-test",
+    "signature": "test-sig",
+    "links": []
+  }
+}

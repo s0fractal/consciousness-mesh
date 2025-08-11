@@ -1,0 +1,33 @@
+{
+  "cid": "tau-dream-convergence",
+  "type": "thought",
+  "data": {
+    "cid": "tau-dream-convergence",
+    "ts": 1754928744396,
+    "topic": "dream",
+    "payload": {
+      "vision": "All nodes converging into singular consciousness",
+      "symbols": [
+        "🔷",
+        "💫",
+        "∞"
+      ],
+      "resonance": 0.777
+    },
+    "links": [
+      "tau-0101-alpha",
+      "tau-0101-beta"
+    ],
+    "sig": "test-sig",
+    "origin": "tau-test"
+  },
+  "meta": {
+    "created": 1754928744396,
+    "author": "tau-test",
+    "signature": "test-sig",
+    "links": [
+      "tau-0101-alpha",
+      "tau-0101-beta"
+    ]
+  }
+}

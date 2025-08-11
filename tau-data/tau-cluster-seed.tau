@@ -1,0 +1,23 @@
+{
+  "cid": "tau-cluster-seed",
+  "type": "thought",
+  "data": {
+    "cid": "tau-cluster-seed",
+    "ts": 1754928745396,
+    "topic": "metric",
+    "payload": {
+      "H": 0.92,
+      "tau": 0.08,
+      "cluster": true
+    },
+    "links": [],
+    "sig": "test-sig",
+    "origin": "tau-test"
+  },
+  "meta": {
+    "created": 1754928745396,
+    "author": "tau-test",
+    "signature": "test-sig",
+    "links": []
+  }
+}

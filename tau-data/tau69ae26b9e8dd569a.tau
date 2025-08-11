@@ -1,0 +1,15 @@
+{
+  "cid": "tau69ae26b9e8dd569a",
+  "type": "rule",
+  "data": {
+    "name": "resonance-cascade",
+    "condition": "when count(pattern='0101') > 1",
+    "action": "trigger resonance cascade",
+    "priority": 1
+  },
+  "meta": {
+    "created": 1754928742018,
+    "author": "tau-test-001",
+    "links": []
+  }
+}

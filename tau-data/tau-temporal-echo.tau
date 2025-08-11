@@ -1,0 +1,23 @@
+{
+  "cid": "tau-temporal-echo",
+  "type": "thought",
+  "data": {
+    "cid": "tau-temporal-echo",
+    "ts": 1754928743396,
+    "topic": "event",
+    "payload": {
+      "type": "temporal_anomaly",
+      "temporalPressure": -0.9,
+      "message": "Message from the future past"
+    },
+    "links": [],
+    "sig": "test-sig",
+    "origin": "tau-test"
+  },
+  "meta": {
+    "created": 1754928743396,
+    "author": "tau-test",
+    "signature": "test-sig",
+    "links": []
+  }
+}

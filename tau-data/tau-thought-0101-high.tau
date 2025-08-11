@@ -1,0 +1,22 @@
+{
+  "cid": "tau-thought-0101-high",
+  "type": "thought",
+  "data": {
+    "cid": "tau-thought-0101-high",
+    "ts": 1754926969838,
+    "topic": "metric",
+    "payload": {
+      "H": 0.95,
+      "tau": 0.05
+    },
+    "links": [],
+    "sig": "tau-sig",
+    "origin": "tau-demo"
+  },
+  "meta": {
+    "created": 1754926969838,
+    "author": "tau-demo",
+    "signature": "tau-sig",
+    "links": []
+  }
+}
