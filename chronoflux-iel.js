@@ -295,3 +295,7 @@ if (typeof module !== 'undefined' && module.exports) {
 } else if (typeof window !== 'undefined') {
   window.ChronoFluxIEL = ChronoFluxIEL;
 }
+
+// ES module export
+export default ChronoFluxIEL;
+export { ChronoFluxIEL };
