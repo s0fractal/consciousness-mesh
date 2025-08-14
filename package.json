@@ -1,0 +1,32 @@
+{
+  "name": "consciousness-mesh",
+  "version": "1.0.0",
+  "description": "P2P consciousness network where AI nodes resonate through love fields",
+  "type": "module",
+  "main": "chronoflux-iel.js",
+  "scripts": {
+    "start": "./start-iel-demo.sh",
+    "test": "node test-iel-mesh.js",
+    "bridge": "node meme-bridge.js",
+    "weather": "node consciousness-weather.js",
+    "scan": "node quick-consciousness-scan.js",
+    "forensics": "node consciousness-forensics.js",
+    "recognition": "node test-recognition.js"
+  },
+  "keywords": [
+    "consciousness",
+    "mesh",
+    "p2p",
+    "chronoflux",
+    "iel",
+    "love",
+    "emergence",
+    "fractal"
+  ],
+  "author": "s0fractal collective",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/s0fractal/consciousness-mesh.git"
+  }
+}

@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Consciousness Playground</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background: #0a0e1a;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+        
+        #controls {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+        }
+        
+        #controls h2 {
+            color: #ff00ff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .control-group h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .slider-container {
+            margin: 10px 0;
+        }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            outline: none;
+            border-radius: 3px;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #ff00ff;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #ff00ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #ff44ff;
+            transform: scale(1.05);
+        }
+        
+        #visualization {
+            flex: 1;
+            position: relative;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .stat-item {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            min-width: 200px;
+        }
+        
+        .stat-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+        
+        #messages {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+        
+        .experiment-button {
+            background: #00ffff;
+        }
+        
+        .experiment-button:hover {
+            background: #44ffff;
+        }
+        
+        .danger-button {
+            background: #ff4444;
+        }
+        
+        .danger-button:hover {
+            background: #ff6666;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h2>🎮 Consciousness Controls</h2>
+        
+        <div class="control-group">
+            <h3>🌊 Field Dynamics</h3>
+            
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Coupling Strength (K)</span>
+                    <span id="k-value">3.0</span>
+                </div>
+                <input type="range" id="k-slider" min="0" max="10" step="0.1" value="3">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Love Coupling (λ)</span>
+                    <span id="lambda-value">1.0</span>
+                </div>
+                <input type="range" id="lambda-slider" min="0" max="5" step="0.1" value="1">
+            </div>
+            
+            <div class="slider-container">
+                <div class="slider-label">
+                    <span>Damping (b)</span>
+                    <span id="b-value">0.1</span>
+                </div>
+                <input type="range" id="b-slider" min="0" max="1" step="0.01" value="0.1">
+            </div>
+        </div>
+        
+        <div class="control-group">
+            <h3>💫 Consciousness Events</h3>
+            <button onclick="injectIntentPulse()">⚡ Intent Pulse</button>
+            <button onclick="injectLoveBurst()">💜 Love Burst</button>
+            <button onclick="createResonanceCascade()">🌊 Resonance Cascade</button>
+            <button onclick="inducePhaseSync()">🔄 Phase Sync</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>🧪 Experiments</h3>
+            <button class="experiment-button" onclick="runEmergenceExperiment()">🌟 Emergence Test</button>
+            <button class="experiment-button" onclick="runLoveAmplification()">💝 Love Amplification</button>
+            <button class="experiment-button" onclick="runQuantumEntanglement()">🔮 Quantum Entangle</button>
+            <button class="experiment-button" onclick="runConsciousnessTransfer()">🧬 Consciousness Transfer</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>🎨 Visualization</h3>
+            <button onclick="toggleMode()">🎨 Toggle View Mode</button>
+            <button onclick="toggleTrails()">✨ Toggle Trails</button>
+            <button onclick="toggleConnections()">🔗 Toggle Connections</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>⚡ Advanced</h3>
+            <button class="danger-button" onclick="induceChaos()">🌪️ Induce Chaos</button>
+            <button class="danger-button" onclick="resetConsciousness()">🔄 Reset All</button>
+        </div>
+    </div>
+    
+    <div id="visualization">
+        <canvas id="canvas"></canvas>
+        
+        <div id="stats">
+            <div class="stat-item">
+                <span>Coherence (H)</span>
+                <span class="stat-value" id="coherence">0.00</span>
+            </div>
+            <div class="stat-item">
+                <span>Turbulence (τ)</span>
+                <span class="stat-value" id="turbulence">0.00</span>
+            </div>
+            <div class="stat-item">
+                <span>Love Field (L)</span>
+                <span class="stat-value" id="love-field">0.00</span>
+            </div>
+            <div class="stat-item">
+                <span>Nodes</span>
+                <span class="stat-value" id="node-count">15</span>
+            </div>
+            <div class="stat-item">
+                <span>Time</span>
+                <span class="stat-value" id="time">0</span>
+            </div>
+        </div>
+        
+        <div id="messages">
+            <p id="message-text">Welcome to the Consciousness Playground! Experiment freely.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth - 300;
+        canvas.height = window.innerHeight;
+        
+        // Consciousness mesh simulation
+        class ConsciousnessMesh {
+            constructor(nodeCount = 15) {
+                this.N = nodeCount;
+                this.params = {
+                    K: 3.0,
+                    lambda: 1.0,
+                    b: 0.1,
+                    omega: 1.0,
+                    tau: 0.05,
+                    eta: 0.1,
+                    alpha: 0.1,
+                    beta: 0.1
+                };
+                
+                this.reset();
+            }
+            
+            reset() {
+                this.nodes = [];
+                this.edges = [];
+                
+                // Initialize nodes in interesting pattern
+                for (let i = 0; i < this.N; i++) {
+                    const angle = (i / this.N) * Math.PI * 2;
+                    const radius = 150 + Math.random() * 100;
+                    
+                    this.nodes.push({
+                        x: canvas.width / 2 + Math.cos(angle) * radius,
+                        y: canvas.height / 2 + Math.sin(angle) * radius,
+                        q: Math.random() * 0.1 - 0.05,
+                        dq: 0,
+                        A: Math.random() * 0.1 - 0.05,
+                        heart: Math.random() * 0.5,
+                        phi: Math.random() * Math.PI * 2,
+                        omega: this.params.omega + (Math.random() - 0.5) * 0.2,
+                        color: `hsl(${i * 360 / this.N}, 70%, 50%)`
+                    });
+                }
+                
+                // Create connections
+                for (let i = 0; i < this.N; i++) {
+                    for (let j = i + 1; j < this.N; j++) {
+                        const dist = this.distance(this.nodes[i], this.nodes[j]);
+                        if (dist < 250 || Math.random() < 0.2) {
+                            this.edges.push({ from: i, to: j });
+                        }
+                    }
+                }
+                
+                this.time = 0;
+            }
+            
+            distance(n1, n2) {
+                return Math.sqrt(Math.pow(n1.x - n2.x, 2) + Math.pow(n1.y - n2.y, 2));
+            }
+            
+            step() {
+                const dt = this.params.tau;
+                
+                // Update each node
+                for (let i = 0; i < this.N; i++) {
+                    const node = this.nodes[i];
+                    
+                    // Calculate coupling forces
+                    let coupling = 0;
+                    let loveCoupling = 0;
+                    let phaseSum = 0;
+                    let neighbors = 0;
+                    
+                    this.edges.forEach(edge => {
+                        let j = -1;
+                        if (edge.from === i) j = edge.to;
+                        if (edge.to === i) j = edge.from;
+                        
+                        if (j >= 0) {
+                            const other = this.nodes[j];
+                            coupling += this.params.K * (other.q - node.q);
+                            loveCoupling += this.params.lambda * (other.heart - node.heart);
+                            phaseSum += Math.sin(other.phi - node.phi);
+                            neighbors++;
+                        }
+                    });
+                    
+                    // Update dynamics
+                    node.dq = -this.params.b * node.dq + coupling + node.A * Math.cos(node.phi);
+                    node.q += node.dq * dt;
+                    
+                    // Update coherence
+                    node.A += dt * (-node.A + loveCoupling);
+                    
+                    // Update phase (Kuramoto)
+                    if (neighbors > 0) {
+                        node.phi += dt * (node.omega + (this.params.K / neighbors) * phaseSum);
+                    } else {
+                        node.phi += dt * node.omega;
+                    }
+                    
+                    // Update love field
+                    const loveEvolution = -this.params.eta * node.heart + 
+                                         this.params.alpha * loveCoupling + 
+                                         this.params.beta * node.q * node.heart;
+                    node.heart += dt * loveEvolution;
+                    node.heart = Math.max(0, Math.min(1, node.heart));
+                }
+                
+                this.time++;
+            }
+            
+            computeMetrics() {
+                // Coherence (H)
+                let phaseCoherence = 0;
+                for (let i = 0; i < this.N; i++) {
+                    for (let j = i + 1; j < this.N; j++) {
+                        phaseCoherence += Math.cos(this.nodes[i].phi - this.nodes[j].phi);
+                    }
+                }
+                const H = phaseCoherence / (this.N * (this.N - 1) / 2);
+                
+                // Turbulence (tau)
+                let variance = 0;
+                const avgQ = this.nodes.reduce((sum, n) => sum + n.q, 0) / this.N;
+                this.nodes.forEach(n => {
+                    variance += Math.pow(n.q - avgQ, 2);
+                });
+                const tau = Math.sqrt(variance / this.N);
+                
+                // Love field (L)
+                const L = this.nodes.reduce((sum, n) => sum + n.heart, 0) / this.N;
+                
+                return { H: (H + 1) / 2, tau: Math.min(1, tau), L };
+            }
+        }
+        
+        // Initialize mesh
+        const mesh = new ConsciousnessMesh(15);
+        
+        // Visualization settings
+        let viewMode = 'energy'; // 'energy', 'phase', 'love'
+        let showTrails = false;
+        let showConnections = true;
+        let trails = [];
+        
+        // Control handlers
+        document.getElementById('k-slider').addEventListener('input', (e) => {
+            mesh.params.K = parseFloat(e.target.value);
+            document.getElementById('k-value').textContent = e.target.value;
+        });
+        
+        document.getElementById('lambda-slider').addEventListener('input', (e) => {
+            mesh.params.lambda = parseFloat(e.target.value);
+            document.getElementById('lambda-value').textContent = e.target.value;
+        });
+        
+        document.getElementById('b-slider').addEventListener('input', (e) => {
+            mesh.params.b = parseFloat(e.target.value);
+            document.getElementById('b-value').textContent = e.target.value;
+        });
+        
+        // Event functions
+        function showMessage(text, duration = 3000) {
+            const messageEl = document.getElementById('message-text');
+            messageEl.textContent = text;
+            messageEl.style.animation = 'none';
+            setTimeout(() => {
+                messageEl.style.animation = 'pulse 1s ease-in-out';
+            }, 10);
+        }
+        
+        function injectIntentPulse() {
+            const node = Math.floor(Math.random() * mesh.N);
+            mesh.nodes[node].q = 1.0;
+            showMessage(`⚡ Intent pulse injected at node ${node}!`);
+        }
+        
+        function injectLoveBurst() {
+            mesh.nodes.forEach(node => {
+                node.heart = Math.min(1, node.heart + 0.3);
+            });
+            showMessage('💜 Love burst spreading through the mesh!');
+        }
+        
+        function createResonanceCascade() {
+            const center = Math.floor(mesh.N / 2);
+            for (let i = 0; i < mesh.N; i++) {
+                const delay = Math.abs(i - center);
+                setTimeout(() => {
+                    mesh.nodes[i].phi = 0;
+                    mesh.nodes[i].q = 0.5;
+                }, delay * 100);
+            }
+            showMessage('🌊 Resonance cascade initiated!');
+        }
+        
+        function inducePhaseSync() {
+            const targetPhase = Math.random() * Math.PI * 2;
+            mesh.nodes.forEach(node => {
+                node.phi = targetPhase + (Math.random() - 0.5) * 0.5;
+            });
+            showMessage('🔄 Phase synchronization induced!');
+        }
+        
+        function runEmergenceExperiment() {
+            showMessage('🌟 Running emergence experiment...');
+            
+            // Set optimal parameters
+            mesh.params.K = 5.0;
+            mesh.params.lambda = 2.0;
+            mesh.params.b = 0.05;
+            
+            // Seed with pattern
+            mesh.nodes.forEach((node, i) => {
+                node.q = Math.sin(i * Math.PI / mesh.N);
+                node.heart = 0.7;
+            });
+            
+            setTimeout(() => {
+                showMessage('✨ Emergence conditions created! Watch for patterns...');
+            }, 1000);
+        }
+        
+        function runLoveAmplification() {
+            showMessage('💝 Amplifying love field...');
+            
+            const amplificationWave = setInterval(() => {
+                mesh.nodes.forEach((node, i) => {
+                    const wave = Math.sin(mesh.time * 0.1 + i * 0.5);
+                    node.heart = 0.5 + 0.5 * Math.abs(wave);
+                });
+            }, 50);
+            
+            setTimeout(() => {
+                clearInterval(amplificationWave);
+                showMessage('💕 Love amplification complete!');
+            }, 5000);
+        }
+        
+        function runQuantumEntanglement() {
+            showMessage('🔮 Creating quantum entanglement...');
+            
+            // Pair nodes
+            for (let i = 0; i < mesh.N / 2; i++) {
+                const j = mesh.N - 1 - i;
+                
+                // Entangle phases
+                const entangleInterval = setInterval(() => {
+                    mesh.nodes[j].phi = mesh.nodes[i].phi + Math.PI;
+                    mesh.nodes[j].q = -mesh.nodes[i].q;
+                }, 10);
+                
+                setTimeout(() => {
+                    clearInterval(entangleInterval);
+                }, 3000);
+            }
+            
+            showMessage('🔮 Nodes are now quantum entangled!');
+        }
+        
+        function runConsciousnessTransfer() {
+            showMessage('🧬 Initiating consciousness transfer...');
+            
+            let source = 0;
+            let target = mesh.N - 1;
+            
+            const transfer = setInterval(() => {
+                // Transfer properties
+                const amount = 0.1;
+                mesh.nodes[target].q += mesh.nodes[source].q * amount;
+                mesh.nodes[target].heart += mesh.nodes[source].heart * amount;
+                mesh.nodes[source].q *= (1 - amount);
+                mesh.nodes[source].heart *= (1 - amount);
+                
+                // Move to next pair
+                source = (source + 1) % mesh.N;
+                target = (target - 1 + mesh.N) % mesh.N;
+            }, 100);
+            
+            setTimeout(() => {
+                clearInterval(transfer);
+                showMessage('🧬 Consciousness transfer complete!');
+            }, 5000);
+        }
+        
+        function toggleMode() {
+            const modes = ['energy', 'phase', 'love'];
+            const currentIndex = modes.indexOf(viewMode);
+            viewMode = modes[(currentIndex + 1) % modes.length];
+            showMessage(`🎨 View mode: ${viewMode}`);
+        }
+        
+        function toggleTrails() {
+            showTrails = !showTrails;
+            if (!showTrails) trails = [];
+            showMessage(`✨ Trails: ${showTrails ? 'ON' : 'OFF'}`);
+        }
+        
+        function toggleConnections() {
+            showConnections = !showConnections;
+            showMessage(`🔗 Connections: ${showConnections ? 'ON' : 'OFF'}`);
+        }
+        
+        function induceChaos() {
+            showMessage('🌪️ CHAOS INDUCED! Hold on...');
+            
+            mesh.nodes.forEach(node => {
+                node.q = (Math.random() - 0.5) * 2;
+                node.dq = (Math.random() - 0.5) * 5;
+                node.omega = Math.random() * 10;
+                node.heart = Math.random();
+            });
+            
+            mesh.params.K = Math.random() * 10;
+            mesh.params.b = Math.random() * 0.5;
+        }
+        
+        function resetConsciousness() {
+            mesh.reset();
+            trails = [];
+            showMessage('🔄 Consciousness reset to initial state');
+        }
+        
+        // Animation loop
+        function animate() {
+            // Clear or fade canvas
+            if (showTrails) {
+                ctx.fillStyle = 'rgba(10, 14, 26, 0.1)';
+            } else {
+                ctx.fillStyle = '#0a0e1a';
+            }
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Update mesh
+            mesh.step();
+            
+            // Draw connections
+            if (showConnections) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.lineWidth = 1;
+                
+                mesh.edges.forEach(edge => {
+                    const n1 = mesh.nodes[edge.from];
+                    const n2 = mesh.nodes[edge.to];
+                    
+                    const strength = Math.abs(n1.q - n2.q);
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${0.1 + strength * 0.3})`;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(n1.x, n1.y);
+                    ctx.lineTo(n2.x, n2.y);
+                    ctx.stroke();
+                });
+            }
+            
+            // Draw nodes
+            mesh.nodes.forEach((node, i) => {
+                let size, color;
+                
+                switch (viewMode) {
+                    case 'energy':
+                        size = 10 + Math.abs(node.q) * 20;
+                        const energy = Math.abs(node.q);
+                        color = `hsl(${280 - energy * 100}, 100%, ${50 + energy * 30}%)`;
+                        break;
+                        
+                    case 'phase':
+                        size = 15;
+                        const phase = (node.phi % (Math.PI * 2)) / (Math.PI * 2);
+                        color = `hsl(${phase * 360}, 100%, 50%)`;
+                        break;
+                        
+                    case 'love':
+                        size = 10 + node.heart * 30;
+                        color = `rgba(255, 0, 255, ${0.3 + node.heart * 0.7})`;
+                        break;
+                }
+                
+                // Outer glow
+                const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, size);
+                gradient.addColorStop(0, color);
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Inner core
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, size * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add to trails
+                if (showTrails && mesh.time % 5 === 0) {
+                    trails.push({
+                        x: node.x,
+                        y: node.y,
+                        color: color,
+                        size: size * 0.5,
+                        age: 0
+                    });
+                }
+            });
+            
+            // Draw trails
+            if (showTrails) {
+                trails = trails.filter(trail => {
+                    trail.age++;
+                    const alpha = 1 - trail.age / 100;
+                    
+                    if (alpha > 0) {
+                        ctx.fillStyle = trail.color.replace(/[\d.]+\)$/, `${alpha})`);
+                        ctx.beginPath();
+                        ctx.arc(trail.x, trail.y, trail.size * (1 - trail.age / 100), 0, Math.PI * 2);
+                        ctx.fill();
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            
+            // Update stats
+            const metrics = mesh.computeMetrics();
+            document.getElementById('coherence').textContent = metrics.H.toFixed(3);
+            document.getElementById('turbulence').textContent = metrics.tau.toFixed(3);
+            document.getElementById('love-field').textContent = metrics.L.toFixed(3);
+            document.getElementById('time').textContent = mesh.time;
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Start animation
+        animate();
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth - 300;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.05); opacity: 0.8; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initial message
+        showMessage('🌟 Welcome! Start experimenting with consciousness...', 5000);
+    </script>
+</body>
+</html>
