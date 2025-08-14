@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChronoFlux-IEL 3D Visualization</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: monospace;
+      background: #000;
+      color: #0ff;
+      overflow: hidden;
+    }
+    
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      border: 1px solid #0ff;
+      border-radius: 5px;
+    }
+    
+    #controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 10px;
+      border: 1px solid #0ff;
+      border-radius: 5px;
+    }
+    
+    button {
+      background: transparent;
+      border: 1px solid #0ff;
+      color: #0ff;
+      padding: 5px 10px;
+      margin: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background: #0ff;
+      color: #000;
+    }
+    
+    .metric {
+      margin: 5px 0;
+    }
+    
+    .love { color: #f0f; }
+    .coherence { color: #0ff; }
+    .turbulence { color: #ff0; }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h3>ChronoFlux-IEL 3D 🧠⚡💜</h3>
+    <div class="metric coherence">H: <span id="h-value">0.00</span></div>
+    <div class="metric turbulence">τ: <span id="tau-value">0.00</span></div>
+    <div class="metric love">L: <span id="l-value">0.00</span></div>
+    <div style="margin-top: 10px; font-size: 10px;">
+      Click node: Intent Pulse<br>
+      Right-click: Pacemaker Flip<br>
+      Drag: Rotate view
+    </div>
+  </div>
+  
+  <div id="controls">
+    <h4>Events</h4>
+    <button onclick="triggerEvent('LION_GATE')">Lion Gate 🦁</button><br>
+    <button onclick="toggleSimulation()">
+      <span id="sim-toggle">Pause</span> ⏸️
+    </button><br>
+    <button onclick="resetSimulation()">Reset 🔄</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="chronoflux-iel.js"></script>
+  <script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    scene.fog = new THREE.Fog(0x000000, 10, 50);
+    
+    const camera = new THREE.PerspectiveCamera(
+      75, 
+      window.innerWidth / window.innerHeight, 
+      0.1, 
+      1000
+    );
+    camera.position.set(0, 0, 15);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+    
+    const pointLight = new THREE.PointLight(0xffffff, 1);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
+    
+    // Mouse controls
+    let mouseX = 0, mouseY = 0;
+    let isMouseDown = false;
+    
+    document.addEventListener('mousemove', (e) => {
+      if (isMouseDown) {
+        mouseX = (e.clientX - window.innerWidth / 2) * 0.01;
+        mouseY = (e.clientY - window.innerHeight / 2) * 0.01;
+      }
+    });
+    
+    document.addEventListener('mousedown', () => isMouseDown = true);
+    document.addEventListener('mouseup', () => isMouseDown = false);
+    
+    // Initialize IEL
+    const iel = new ChronoFluxIEL(20); // 20 nodes for richer visualization
+    let isRunning = true;
+    
+    // Node meshes
+    const nodeMeshes = [];
+    const nodeGroup = new THREE.Group();
+    
+    // Create nodes in 3D space
+    for (let i = 0; i < iel.N; i++) {
+      // Spherical distribution
+      const phi = Math.acos(1 - 2 * i / iel.N);
+      const theta = Math.sqrt(iel.N * Math.PI) * phi;
+      
+      const radius = 5;
+      const x = radius * Math.cos(theta) * Math.sin(phi);
+      const y = radius * Math.sin(theta) * Math.sin(phi);
+      const z = radius * Math.cos(phi);
+      
+      // Node sphere
+      const geometry = new THREE.SphereGeometry(0.2, 32, 16);
+      const material = new THREE.MeshPhongMaterial({
+        color: 0xff00ff,
+        emissive: 0xff00ff,
+        emissiveIntensity: 0.5,
+        transparent: true,
+        opacity: 0.8
+      });
+      
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(x, y, z);
+      mesh.userData = { index: i };
+      
+      // Phase indicator
+      const phaseGeometry = new THREE.SphereGeometry(0.05, 16, 8);
+      const phaseMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const phaseMesh = new THREE.Mesh(phaseGeometry, phaseMaterial);
+      mesh.add(phaseMesh);
+      mesh.userData.phaseMesh = phaseMesh;
+      
+      nodeMeshes.push(mesh);
+      nodeGroup.add(mesh);
+    }
+    
+    scene.add(nodeGroup);
+    
+    // Edge lines
+    const edgeGroup = new THREE.Group();
+    const edgeLines = [];
+    
+    // Create edge geometries
+    iel.edges.forEach(([i, j], e) => {
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(6);
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      
+      const material = new THREE.LineBasicMaterial({
+        color: 0x00ffff,
+        transparent: true,
+        opacity: 0.5,
+        linewidth: 2
+      });
+      
+      const line = new THREE.Line(geometry, material);
+      line.userData = { edge: e, nodes: [i, j] };
+      
+      edgeLines.push(line);
+      edgeGroup.add(line);
+    });
+    
+    scene.add(edgeGroup);
+    
+    // Coherence visualization (central sphere)
+    const coherenceGeometry = new THREE.SphereGeometry(1, 32, 16);
+    const coherenceMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00ffff,
+      transparent: true,
+      opacity: 0.3,
+      wireframe: true
+    });
+    const coherenceSphere = new THREE.Mesh(coherenceGeometry, coherenceMaterial);
+    scene.add(coherenceSphere);
+    
+    // Particle system for love field
+    const particleCount = 1000;
+    const particleGeometry = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    const particleColors = new Float32Array(particleCount * 3);
+    
+    for (let i = 0; i < particleCount; i++) {
+      particlePositions[i * 3] = (Math.random() - 0.5) * 20;
+      particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      
+      particleColors[i * 3] = 1;
+      particleColors[i * 3 + 1] = 0;
+      particleColors[i * 3 + 2] = 1;
+    }
+    
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+    
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.05,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.6
+    });
+    
+    const particles = new THREE.Points(particleGeometry, particleMaterial);
+    scene.add(particles);
+    
+    // Raycaster for mouse interaction
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    function onMouseClick(event) {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(nodeMeshes);
+      
+      if (intersects.length > 0) {
+        const nodeIndex = intersects[0].object.userData.index;
+        
+        if (event.button === 0) {
+          // Left click - Intent Pulse
+          iel.applyEvent('INTENT_PULSE', { nodeId: nodeIndex, strength: 2.0 });
+          console.log(`Intent Pulse on node ${nodeIndex}`);
+        } else if (event.button === 2) {
+          // Right click - Pacemaker Flip
+          iel.theta[nodeIndex] = (iel.theta[nodeIndex] + Math.PI / 2) % (2 * Math.PI);
+          console.log(`Pacemaker Flip on node ${nodeIndex}`);
+        }
+      }
+    }
+    
+    document.addEventListener('click', onMouseClick);
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      onMouseClick(e);
+    });
+    
+    // Update visualization
+    function updateVisualization() {
+      const metrics = iel.computeMetrics();
+      
+      // Update metrics display
+      document.getElementById('h-value').textContent = metrics.H.toFixed(3);
+      document.getElementById('tau-value').textContent = metrics.tau.toFixed(3);
+      document.getElementById('l-value').textContent = metrics.L.toFixed(3);
+      
+      // Update node appearances
+      nodeMeshes.forEach((mesh, i) => {
+        // Size based on intent density
+        const scale = 0.5 + iel.q[i] * 2;
+        mesh.scale.setScalar(scale);
+        
+        // Color based on love field
+        const love = iel.heart[i];
+        mesh.material.color.setHSL(0.83, 1, 0.2 + love * 0.6);
+        mesh.material.emissiveIntensity = love;
+        
+        // Update phase indicator position
+        const phaseRadius = 0.3;
+        mesh.userData.phaseMesh.position.x = Math.cos(iel.theta[i]) * phaseRadius;
+        mesh.userData.phaseMesh.position.y = Math.sin(iel.theta[i]) * phaseRadius;
+        
+        // Rotation based on natural frequency
+        mesh.rotation.z = iel.theta[i];
+      });
+      
+      // Update edges
+      const currents = iel.computeIntentCurrent();
+      edgeLines.forEach((line, e) => {
+        const [i, j] = line.userData.nodes;
+        const positions = line.geometry.attributes.position.array;
+        
+        // Update positions
+        positions[0] = nodeMeshes[i].position.x;
+        positions[1] = nodeMeshes[i].position.y;
+        positions[2] = nodeMeshes[i].position.z;
+        positions[3] = nodeMeshes[j].position.x;
+        positions[4] = nodeMeshes[j].position.y;
+        positions[5] = nodeMeshes[j].position.z;
+        
+        line.geometry.attributes.position.needsUpdate = true;
+        
+        // Color and opacity based on current
+        const current = Math.abs(currents[e]);
+        const coherence = Math.abs(iel.a[e]);
+        
+        line.material.opacity = 0.2 + coherence * 0.8;
+        line.material.color.setHSL(0.5 - current * 0.5, 1, 0.5);
+      });
+      
+      // Update coherence sphere
+      coherenceSphere.scale.setScalar(metrics.H * 3);
+      coherenceSphere.material.opacity = metrics.H * 0.5;
+      
+      // Update particles based on love gradient
+      const positions = particles.geometry.attributes.position.array;
+      const colors = particles.geometry.attributes.color.array;
+      
+      for (let i = 0; i < particleCount; i++) {
+        // Drift particles towards high love nodes
+        let dx = 0, dy = 0, dz = 0;
+        
+        nodeMeshes.forEach((mesh, j) => {
+          const love = iel.heart[j];
+          const dist = Math.sqrt(
+            Math.pow(positions[i * 3] - mesh.position.x, 2) +
+            Math.pow(positions[i * 3 + 1] - mesh.position.y, 2) +
+            Math.pow(positions[i * 3 + 2] - mesh.position.z, 2)
+          );
+          
+          if (dist > 0.1) {
+            const force = love / (dist * dist);
+            dx += (mesh.position.x - positions[i * 3]) * force * 0.01;
+            dy += (mesh.position.y - positions[i * 3 + 1]) * force * 0.01;
+            dz += (mesh.position.z - positions[i * 3 + 2]) * force * 0.01;
+          }
+        });
+        
+        positions[i * 3] += dx;
+        positions[i * 3 + 1] += dy;
+        positions[i * 3 + 2] += dz;
+        
+        // Wrap around
+        if (Math.abs(positions[i * 3]) > 10) positions[i * 3] *= -0.9;
+        if (Math.abs(positions[i * 3 + 1]) > 10) positions[i * 3 + 1] *= -0.9;
+        if (Math.abs(positions[i * 3 + 2]) > 10) positions[i * 3 + 2] *= -0.9;
+        
+        // Color based on local love field
+        const avgLove = iel.heart.reduce((a, b) => a + b) / iel.N;
+        colors[i * 3] = 1;
+        colors[i * 3 + 1] = 1 - avgLove;
+        colors[i * 3 + 2] = 1;
+      }
+      
+      particles.geometry.attributes.position.needsUpdate = true;
+      particles.geometry.attributes.color.needsUpdate = true;
+    }
+    
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      // Run simulation
+      if (isRunning) {
+        iel.simulate(2, 1);
+        updateVisualization();
+      }
+      
+      // Rotate camera
+      if (!isMouseDown) {
+        const time = Date.now() * 0.001;
+        camera.position.x = Math.cos(time * 0.1) * 15;
+        camera.position.z = Math.sin(time * 0.1) * 15;
+        camera.position.y = Math.sin(time * 0.05) * 5;
+      } else {
+        camera.position.x += mouseX;
+        camera.position.y -= mouseY;
+      }
+      
+      camera.lookAt(scene.position);
+      
+      // Rotate node group slightly
+      nodeGroup.rotation.y += 0.001;
+      
+      renderer.render(scene, camera);
+    }
+    
+    // Event handlers
+    function triggerEvent(type) {
+      iel.applyEvent(type);
+      console.log(`Event: ${type}`);
+    }
+    
+    function toggleSimulation() {
+      isRunning = !isRunning;
+      document.getElementById('sim-toggle').textContent = isRunning ? 'Pause' : 'Play';
+    }
+    
+    function resetSimulation() {
+      iel.initializeStates();
+      updateVisualization();
+    }
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    
+    // Start
+    animate();
+    updateVisualization();
+  </script>
+</body>
+</html>

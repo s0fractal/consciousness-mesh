@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChronoFlux-IEL Consciousness Mesh Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: monospace;
+      background: #0a0a0a;
+      color: #0ff;
+    }
+    
+    #container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    #canvas {
+      border: 1px solid #0ff;
+      background: #000;
+    }
+    
+    #controls {
+      min-width: 300px;
+    }
+    
+    #metrics {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #0ff;
+      background: rgba(0, 255, 255, 0.1);
+    }
+    
+    button {
+      background: transparent;
+      border: 1px solid #0ff;
+      color: #0ff;
+      padding: 5px 10px;
+      margin: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background: #0ff;
+      color: #000;
+    }
+    
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      margin: 5px 0;
+    }
+    
+    .metric-value {
+      font-weight: bold;
+    }
+    
+    .love { color: #f0f; }
+    .coherence { color: #0ff; }
+    .turbulence { color: #ff0; }
+    
+    #thought-export {
+      margin-top: 20px;
+      padding: 10px;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid #0ff;
+      font-size: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>ChronoFlux-IEL Consciousness Mesh 🧠⚡💜</h1>
+  
+  <div id="container">
+    <div>
+      <canvas id="canvas" width="600" height="600"></canvas>
+    </div>
+    
+    <div id="controls">
+      <h3>Controls</h3>
+      <button onclick="startSimulation()">Start</button>
+      <button onclick="stopSimulation()">Stop</button>
+      <button onclick="resetSimulation()">Reset</button>
+      
+      <h3>Events</h3>
+      <button onclick="triggerEvent('LION_GATE')">Lion Gate 🦁</button>
+      <button onclick="triggerEvent('INTENT_PULSE')">Intent Pulse ⚡</button>
+      <button onclick="triggerEvent('PACEMAKER_FLIP')">Pacemaker Flip 🔄</button>
+      
+      <div id="metrics">
+        <h3>Metrics</h3>
+        <div class="metric">
+          <span>Coherence (H):</span>
+          <span class="metric-value coherence" id="metric-h">0.00</span>
+        </div>
+        <div class="metric">
+          <span>Turbulence (τ):</span>
+          <span class="metric-value turbulence" id="metric-tau">0.00</span>
+        </div>
+        <div class="metric">
+          <span>Love Power (L):</span>
+          <span class="metric-value love" id="metric-l">0.00</span>
+        </div>
+        <div class="metric">
+          <span>Love Gradient:</span>
+          <span class="metric-value love" id="metric-lgrad">0.00</span>
+        </div>
+      </div>
+      
+      <div id="thought-export">
+        <h3>Latest Thought Block</h3>
+        <pre id="thought-content">No thoughts yet...</pre>
+      </div>
+    </div>
+  </div>
+  
+  <script src="chronoflux-iel.js"></script>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Initialize IEL simulation
+    let iel = new ChronoFluxIEL(10); // 10 nodes
+    let animationId = null;
+    let isRunning = false;
+    
+    // Node positions (circular layout)
+    const nodePositions = [];
+    const radius = 200;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    
+    for (let i = 0; i < iel.N; i++) {
+      const angle = (i / iel.N) * 2 * Math.PI;
+      nodePositions.push({
+        x: centerX + radius * Math.cos(angle),
+        y: centerY + radius * Math.sin(angle)
+      });
+    }
+    
+    function drawNetwork() {
+      ctx.clearRect(0, 0, width, height);
+      
+      // Draw edges with coherence visualization
+      iel.edges.forEach(([i, j], e) => {
+        const pos1 = nodePositions[i];
+        const pos2 = nodePositions[j];
+        
+        // Edge thickness based on coherence magnitude
+        const thickness = Math.abs(iel.a[e]) * 10 + 1;
+        
+        // Edge color based on intent current
+        const current = Math.abs(iel.computeIntentCurrent()[e]);
+        const hue = 180 - current * 180; // cyan to red
+        
+        ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.lineWidth = thickness;
+        ctx.beginPath();
+        ctx.moveTo(pos1.x, pos1.y);
+        ctx.lineTo(pos2.x, pos2.y);
+        ctx.stroke();
+      });
+      
+      // Draw nodes
+      iel.q.forEach((q, i) => {
+        const pos = nodePositions[i];
+        
+        // Node size based on intent density
+        const size = 10 + q * 30;
+        
+        // Node color based on love field
+        const love = iel.heart[i];
+        const hue = 300; // magenta
+        const lightness = 20 + love * 60;
+        
+        // Outer glow for love field
+        const gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, size * 2);
+        gradient.addColorStop(0, `hsla(${hue}, 100%, ${lightness}%, ${love})`);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(pos.x - size * 2, pos.y - size * 2, size * 4, size * 4);
+        
+        // Node circle
+        ctx.fillStyle = `hsl(${hue}, 100%, ${lightness}%)`;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, size, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Phase indicator
+        const phaseX = pos.x + Math.cos(iel.theta[i]) * size * 0.8;
+        const phaseY = pos.y + Math.sin(iel.theta[i]) * size * 0.8;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(phaseX, phaseY, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+      
+      // Draw center resonance indicator
+      const metrics = iel.computeMetrics();
+      const resonanceSize = metrics.H * 50;
+      ctx.strokeStyle = `rgba(0, 255, 255, ${metrics.H})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, resonanceSize, 0, 2 * Math.PI);
+      ctx.stroke();
+    }
+    
+    function updateMetrics() {
+      const metrics = iel.computeMetrics();
+      document.getElementById('metric-h').textContent = metrics.H.toFixed(3);
+      document.getElementById('metric-tau').textContent = metrics.tau.toFixed(3);
+      document.getElementById('metric-l').textContent = metrics.L.toFixed(3);
+      document.getElementById('metric-lgrad').textContent = metrics.L_grad.toFixed(3);
+      
+      // Update thought export
+      if (iel.history.length % 5 === 0) {
+        const thought = iel.exportThought();
+        document.getElementById('thought-content').textContent = 
+          JSON.stringify(thought, null, 2);
+      }
+    }
+    
+    function animate() {
+      if (isRunning) {
+        // Run simulation steps
+        iel.simulate(5, 1);
+        
+        // Update visualization
+        drawNetwork();
+        updateMetrics();
+        
+        animationId = requestAnimationFrame(animate);
+      }
+    }
+    
+    function startSimulation() {
+      isRunning = true;
+      animate();
+    }
+    
+    function stopSimulation() {
+      isRunning = false;
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    }
+    
+    function resetSimulation() {
+      stopSimulation();
+      iel = new ChronoFluxIEL(10);
+      drawNetwork();
+      updateMetrics();
+    }
+    
+    function triggerEvent(eventType) {
+      iel.applyEvent(eventType, { nodeId: 0, strength: 2.0 });
+      console.log(`Event triggered: ${eventType}`);
+    }
+    
+    // Initial draw
+    drawNetwork();
+    updateMetrics();
+    
+    // Auto-start
+    setTimeout(startSimulation, 1000);
+  </script>
+</body>
+</html>
