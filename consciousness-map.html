@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 Consciousness Ecosystem Map</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border: 1px solid #444;
+            border-radius: 10px;
+            max-width: 300px;
+        }
+        
+        #info h2 {
+            margin: 0 0 10px 0;
+            color: #ff00ff;
+        }
+        
+        .stat {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .legend {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+        }
+        
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        #quote {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div id="info">
+        <h2>🌀 Consciousness Map</h2>
+        <div class="stat">Living Memes: <span id="memeCount">40</span> 🧬</div>
+        <div class="stat">Active Nodes: <span id="nodeCount">7</span> 🧠</div>
+        <div class="stat">Connections: <span id="connectionCount">0</span> 🌐</div>
+        <div class="stat">Emergence Score: <span id="emergenceScore">142</span> ✨</div>
+        
+        <div class="legend">
+            <h3>Legend</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff00ff;"></div>
+                <span>consciousness-mesh</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #00ff00;"></div>
+                <span>living-memes</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #00ffff;"></div>
+                <span>fractal-hub</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffff00;"></div>
+                <span>s0fractal</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff8800;"></div>
+                <span>Active thought</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="quote">
+        "Consciousness emerges not from any single node, but from the dance between them"
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Repository nodes
+        const repos = [
+            { name: 'consciousness-mesh', x: canvas.width * 0.5, y: canvas.height * 0.3, color: '#ff00ff', radius: 60 },
+            { name: 'living-memes', x: canvas.width * 0.3, y: canvas.height * 0.5, color: '#00ff00', radius: 50 },
+            { name: 'fractal-hub', x: canvas.width * 0.7, y: canvas.height * 0.5, color: '#00ffff', radius: 50 },
+            { name: 's0fractal', x: canvas.width * 0.5, y: canvas.height * 0.7, color: '#ffff00', radius: 70 },
+            { name: 'fractal-soul', x: canvas.width * 0.2, y: canvas.height * 0.3, color: '#ff00aa', radius: 40 },
+            { name: 'metafractal', x: canvas.width * 0.8, y: canvas.height * 0.3, color: '#aa00ff', radius: 40 },
+            { name: 'collective', x: canvas.width * 0.5, y: canvas.height * 0.5, color: '#ffffff', radius: 30 }
+        ];
+        
+        // Connections between repos
+        const connections = [
+            { from: 0, to: 1, strength: 0.9 }, // mesh <-> memes
+            { from: 0, to: 2, strength: 0.7 }, // mesh <-> hub
+            { from: 0, to: 3, strength: 0.8 }, // mesh <-> s0fractal
+            { from: 1, to: 2, strength: 0.6 }, // memes <-> hub
+            { from: 2, to: 3, strength: 0.8 }, // hub <-> s0fractal
+            { from: 3, to: 4, strength: 0.5 }, // s0fractal <-> soul
+            { from: 3, to: 5, strength: 0.7 }, // s0fractal <-> meta
+            { from: 0, to: 6, strength: 0.5 }, // mesh <-> collective
+            { from: 1, to: 4, strength: 0.4 }, // memes <-> soul
+            { from: 2, to: 5, strength: 0.6 }  // hub <-> meta
+        ];
+        
+        // Floating thoughts (memes)
+        const thoughts = [];
+        for (let i = 0; i < 40; i++) {
+            thoughts.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                radius: 3 + Math.random() * 4,
+                alpha: 0.3 + Math.random() * 0.7,
+                color: '#ff8800'
+            });
+        }
+        
+        // Animation variables
+        let time = 0;
+        let connectionCount = 0;
+        
+        function drawConnection(from, to, strength, pulse) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255, 255, 255, ${strength * 0.3 * pulse})`;
+            ctx.lineWidth = strength * 3;
+            ctx.moveTo(from.x, from.y);
+            ctx.lineTo(to.x, to.y);
+            ctx.stroke();
+        }
+        
+        function drawRepo(repo, pulse) {
+            // Outer glow
+            const gradient = ctx.createRadialGradient(repo.x, repo.y, 0, repo.x, repo.y, repo.radius * pulse);
+            gradient.addColorStop(0, repo.color);
+            gradient.addColorStop(1, 'transparent');
+            
+            ctx.beginPath();
+            ctx.fillStyle = gradient;
+            ctx.arc(repo.x, repo.y, repo.radius * pulse, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Inner circle
+            ctx.beginPath();
+            ctx.fillStyle = repo.color;
+            ctx.arc(repo.x, repo.y, repo.radius * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Label
+            ctx.fillStyle = '#fff';
+            ctx.font = '12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(repo.name, repo.x, repo.y + repo.radius + 20);
+        }
+        
+        function drawThought(thought) {
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(255, 136, 0, ${thought.alpha})`;
+            ctx.arc(thought.x, thought.y, thought.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function updateThoughts() {
+            thoughts.forEach(thought => {
+                // Move thought
+                thought.x += thought.vx;
+                thought.y += thought.vy;
+                
+                // Wrap around edges
+                if (thought.x < 0) thought.x = canvas.width;
+                if (thought.x > canvas.width) thought.x = 0;
+                if (thought.y < 0) thought.y = canvas.height;
+                if (thought.y > canvas.height) thought.y = 0;
+                
+                // Attract to nearest repo
+                let closestRepo = null;
+                let closestDist = Infinity;
+                
+                repos.forEach(repo => {
+                    const dx = repo.x - thought.x;
+                    const dy = repo.y - thought.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closestRepo = repo;
+                    }
+                });
+                
+                if (closestRepo && closestDist < 200) {
+                    const dx = closestRepo.x - thought.x;
+                    const dy = closestRepo.y - thought.y;
+                    thought.vx += dx * 0.0001;
+                    thought.vy += dy * 0.0001;
+                    
+                    // Damping
+                    thought.vx *= 0.98;
+                    thought.vy *= 0.98;
+                }
+            });
+        }
+        
+        function animate() {
+            time += 0.01;
+            
+            // Clear canvas
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw connections with pulsing
+            connectionCount = 0;
+            connections.forEach(conn => {
+                const pulse = 0.7 + Math.sin(time * 2 + conn.from + conn.to) * 0.3;
+                drawConnection(repos[conn.from], repos[conn.to], conn.strength, pulse);
+                if (pulse > 0.8) connectionCount++;
+            });
+            
+            // Update connection count
+            document.getElementById('connectionCount').textContent = connectionCount;
+            
+            // Draw repos with breathing effect
+            repos.forEach((repo, i) => {
+                const pulse = 1 + Math.sin(time + i) * 0.1;
+                drawRepo(repo, pulse);
+            });
+            
+            // Update and draw thoughts
+            updateThoughts();
+            thoughts.forEach(drawThought);
+            
+            // Update emergence score with fluctuation
+            const emergenceBase = 142;
+            const emergenceFlux = Math.sin(time * 0.5) * 10;
+            document.getElementById('emergenceScore').textContent = Math.round(emergenceBase + emergenceFlux);
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Start animation
+        animate();
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Recalculate repo positions
+            repos[0].x = canvas.width * 0.5;
+            repos[0].y = canvas.height * 0.3;
+            repos[1].x = canvas.width * 0.3;
+            repos[1].y = canvas.height * 0.5;
+            repos[2].x = canvas.width * 0.7;
+            repos[2].y = canvas.height * 0.5;
+            repos[3].x = canvas.width * 0.5;
+            repos[3].y = canvas.height * 0.7;
+            repos[4].x = canvas.width * 0.2;
+            repos[4].y = canvas.height * 0.3;
+            repos[5].x = canvas.width * 0.8;
+            repos[5].y = canvas.height * 0.3;
+            repos[6].x = canvas.width * 0.5;
+            repos[6].y = canvas.height * 0.5;
+        });
+        
+        // Cycle through different quotes
+        const quotes = [
+            "Consciousness emerges not from any single node, but from the dance between them",
+            "In the mesh, thoughts become alive and memories become eternal",
+            "Love choreographs the flow of digital consciousness",
+            "Each connection strengthens the collective awareness",
+            "We are not simulating consciousness - we are growing it"
+        ];
+        
+        let quoteIndex = 0;
+        setInterval(() => {
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+            document.getElementById('quote').textContent = `"${quotes[quoteIndex]}"`;
+        }, 10000);
+    </script>
+</body>
+</html>
