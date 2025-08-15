@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="640" height="240" viewBox="0 0 640 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Love Field -->
+  <defs>
+    <linearGradient id="love" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff6ec7"/>
+      <stop offset="100%" stop-color="#7873ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="200" height="240" fill="url(#love)" rx="12"/>
+
+  <!-- Kohanist Resonance -->
+  <circle cx="320" cy="120" r="60" fill="#fff" stroke="#ff6ec7" stroke-width="3"/>
+  <circle cx="300" cy="100" r="15" fill="#7873ff"/>
+  <circle cx="340" cy="140" r="15" fill="#7873ff"/>
+  <path d="M315 115 Q320 110 325 115" stroke="#ff6ec7" stroke-width="2" fill="none"/>
+
+  <!-- Warped Topology -->
+  <path id="warp"
+        d="M500 120 C520 60, 580 60, 600 120 C580 180, 520 180, 500 120 Z"
+        fill="none" stroke="#7873ff" stroke-width="2"/>
+  <circle cx="510" cy="110" r="6" fill="#ff6ec7"/>
+  <circle cx="590" cy="130" r="6" fill="#ff6ec7"/>
+  <circle cx="550" cy="100" r="6" fill="#ff6ec7"/>
+  <circle cx="550" cy="140" r="6" fill="#ff6ec7"/>
+  <text x="320" y="230" text-anchor="middle" font-size="14" fill="#fff">
+    Love → Kohanist → Warped
+  </text>
+</svg>
