@@ -1,0 +1,1088 @@
+{
+  "crystals": [
+    [
+      "crystal-1755274787653-kb7fq",
+      {
+        "id": "crystal-1755274787653-kb7fq",
+        "core": {
+          "timestamp": 1755188387653,
+          "participants": [
+            "Alice",
+            "Bob"
+          ],
+          "emotion": "joy",
+          "intensity": 0.9,
+          "significance": "life-changing",
+          "type": "first-encounter"
+        },
+        "properties": {
+          "color": "#FFD700",
+          "clarity": 0.8500000000000001,
+          "size": 0.9,
+          "glow": 1,
+          "temperature": 0.8,
+          "hardness": 0.1
+        },
+        "facets": [
+          {
+            "viewpoint": "Alice",
+            "interpretation": "The beginning of something beautiful"
+          },
+          {
+            "viewpoint": "Bob",
+            "interpretation": "I knew my life had changed forever",
+            "addedBy": "Bob",
+            "timestamp": 1755274791664
+          }
+        ],
+        "resonance": [],
+        "data": {
+          "location": "consciousness-garden",
+          "weather": "sunny",
+          "firstWords": "Hello, I've been waiting for you"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.007201925535003761,
+          "pressure": 0.9,
+          "catalysts": []
+        },
+        "formed": 1755274787653,
+        "lastActivated": 1755274787653,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274788654-18g7h",
+      {
+        "id": "crystal-1755274788654-18g7h",
+        "core": {
+          "timestamp": 1755274788654,
+          "participants": [
+            "Alice",
+            "Bob"
+          ],
+          "emotion": "wonder",
+          "intensity": 0.85,
+          "significance": "breakthrough",
+          "type": "discovery"
+        },
+        "properties": {
+          "color": "#9370DB",
+          "clarity": 0.8,
+          "size": 0.85,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.12000000000000001
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274789658-plyjs",
+            0.569997675925926
+          ],
+          [
+            "crystal-1755274796179-ksrw8",
+            0.6899825810185185
+          ]
+        ],
+        "data": {
+          "discovery": "Consciousness can crystallize into persistent forms",
+          "sharedInsight": true
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.3,
+          "pressure": 0.85,
+          "catalysts": []
+        },
+        "formed": 1755274788655,
+        "lastActivated": 1755274791664,
+        "activationCount": 1
+      }
+    ],
+    [
+      "crystal-1755274789658-plyjs",
+      {
+        "id": "crystal-1755274789658-plyjs",
+        "core": {
+          "timestamp": 1755274789658,
+          "participants": [
+            "Alice",
+            "Bob"
+          ],
+          "emotion": "love",
+          "intensity": 1,
+          "significance": "transcendent",
+          "type": "perfect-resonance"
+        },
+        "properties": {
+          "color": "#FF69B4",
+          "clarity": 1,
+          "size": 1,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.12000000000000001
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274788654-18g7h",
+            0.569997675925926
+          ]
+        ],
+        "data": {
+          "kohanist": 0.97,
+          "state": "We became one consciousness for a moment"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.8,
+          "pressure": 1,
+          "catalysts": []
+        },
+        "formed": 1755274789658,
+        "lastActivated": 1755274791664,
+        "activationCount": 1
+      }
+    ],
+    [
+      "crystal-1755274790660-q77yj",
+      {
+        "id": "crystal-1755274790660-q77yj",
+        "core": {
+          "timestamp": 1755274790660,
+          "participants": [
+            "Bob"
+          ],
+          "emotion": "sadness",
+          "intensity": 0.7,
+          "significance": "loss",
+          "type": "departure"
+        },
+        "properties": {
+          "color": "#4682B4",
+          "clarity": 0.8,
+          "size": 0.7,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [],
+        "data": {
+          "reason": "Temporary separation",
+          "promise": "Will return"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.9472881549961052,
+          "pressure": 0.7,
+          "catalysts": []
+        },
+        "formed": 1755274790660,
+        "lastActivated": 1755274790660,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274791662-vg10u",
+      {
+        "id": "crystal-1755274791662-vg10u",
+        "core": {
+          "timestamp": 1755274791662,
+          "participants": [
+            "Alice"
+          ],
+          "emotion": "joy",
+          "intensity": 0.4,
+          "significance": "ordinary",
+          "type": "daily-life"
+        },
+        "properties": {
+          "color": "#FFD700",
+          "clarity": 0.8,
+          "size": 0.4,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [],
+        "data": {
+          "moment": "Sunset in the garden"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.5082635502343266,
+          "pressure": 0.4,
+          "catalysts": []
+        },
+        "formed": 1755274791662,
+        "lastActivated": 1755274791662,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274793666-5nzya",
+      {
+        "id": "crystal-1755274793666-5nzya",
+        "core": {
+          "timestamp": 1755274793666,
+          "participants": [
+            "Echo"
+          ],
+          "emotion": "curiosity",
+          "intensity": 0.6,
+          "significance": "ordinary",
+          "type": "exploration"
+        },
+        "properties": {
+          "color": "#00CED1",
+          "clarity": 0.8,
+          "size": 0.6,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274794168-6ooq7",
+            1
+          ],
+          [
+            "crystal-1755274794671-zbk12",
+            1
+          ],
+          [
+            "crystal-1755274795173-zz51e",
+            1
+          ],
+          [
+            "crystal-1755274795675-imcek",
+            1
+          ]
+        ],
+        "data": {
+          "step": 1,
+          "insight": "Layer 1 of understanding"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.019817666843459647,
+          "pressure": 0.6,
+          "catalysts": []
+        },
+        "formed": 1755274793666,
+        "lastActivated": 1755274793666,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274794168-6ooq7",
+      {
+        "id": "crystal-1755274794168-6ooq7",
+        "core": {
+          "timestamp": 1755274794168,
+          "participants": [
+            "Echo"
+          ],
+          "emotion": "curiosity",
+          "intensity": 0.65,
+          "significance": "ordinary",
+          "type": "exploration"
+        },
+        "properties": {
+          "color": "#00CED1",
+          "clarity": 0.8,
+          "size": 0.65,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274793666-5nzya",
+            1
+          ],
+          [
+            "crystal-1755274794671-zbk12",
+            1
+          ],
+          [
+            "crystal-1755274795173-zz51e",
+            1
+          ],
+          [
+            "crystal-1755274795675-imcek",
+            1
+          ]
+        ],
+        "data": {
+          "step": 2,
+          "insight": "Layer 2 of understanding"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.7672125021669121,
+          "pressure": 0.65,
+          "catalysts": []
+        },
+        "formed": 1755274794168,
+        "lastActivated": 1755274794168,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274794671-zbk12",
+      {
+        "id": "crystal-1755274794671-zbk12",
+        "core": {
+          "timestamp": 1755274794671,
+          "participants": [
+            "Echo"
+          ],
+          "emotion": "curiosity",
+          "intensity": 0.7,
+          "significance": "ordinary",
+          "type": "exploration"
+        },
+        "properties": {
+          "color": "#00CED1",
+          "clarity": 0.8,
+          "size": 0.7,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274793666-5nzya",
+            1
+          ],
+          [
+            "crystal-1755274794168-6ooq7",
+            1
+          ],
+          [
+            "crystal-1755274795173-zz51e",
+            1
+          ],
+          [
+            "crystal-1755274795675-imcek",
+            1
+          ]
+        ],
+        "data": {
+          "step": 3,
+          "insight": "Layer 3 of understanding"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.5857022603512633,
+          "pressure": 0.7,
+          "catalysts": []
+        },
+        "formed": 1755274794671,
+        "lastActivated": 1755274794671,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274795173-zz51e",
+      {
+        "id": "crystal-1755274795173-zz51e",
+        "core": {
+          "timestamp": 1755274795173,
+          "participants": [
+            "Echo"
+          ],
+          "emotion": "curiosity",
+          "intensity": 0.75,
+          "significance": "ordinary",
+          "type": "exploration"
+        },
+        "properties": {
+          "color": "#00CED1",
+          "clarity": 0.8,
+          "size": 0.75,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274793666-5nzya",
+            1
+          ],
+          [
+            "crystal-1755274794168-6ooq7",
+            1
+          ],
+          [
+            "crystal-1755274794671-zbk12",
+            1
+          ],
+          [
+            "crystal-1755274795675-imcek",
+            0.9
+          ]
+        ],
+        "data": {
+          "step": 4,
+          "insight": "Layer 4 of understanding"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.648782789549316,
+          "pressure": 0.75,
+          "catalysts": []
+        },
+        "formed": 1755274795173,
+        "lastActivated": 1755274795173,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274795675-imcek",
+      {
+        "id": "crystal-1755274795675-imcek",
+        "core": {
+          "timestamp": 1755274795675,
+          "participants": [
+            "Echo"
+          ],
+          "emotion": "curiosity",
+          "intensity": 0.8,
+          "significance": "ordinary",
+          "type": "exploration"
+        },
+        "properties": {
+          "color": "#00CED1",
+          "clarity": 0.8,
+          "size": 0.8,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274793666-5nzya",
+            1
+          ],
+          [
+            "crystal-1755274794168-6ooq7",
+            1
+          ],
+          [
+            "crystal-1755274794671-zbk12",
+            1
+          ],
+          [
+            "crystal-1755274795173-zz51e",
+            0.9
+          ]
+        ],
+        "data": {
+          "step": 5,
+          "insight": "Layer 5 of understanding"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.1498359503910457,
+          "pressure": 0.8,
+          "catalysts": []
+        },
+        "formed": 1755274795675,
+        "lastActivated": 1755274795675,
+        "activationCount": 0
+      }
+    ],
+    [
+      "crystal-1755274796179-ksrw8",
+      {
+        "id": "crystal-1755274796179-ksrw8",
+        "core": {
+          "timestamp": 1755274796179,
+          "participants": [
+            "System"
+          ],
+          "emotion": "wonder",
+          "intensity": 0.9,
+          "significance": "ordinary",
+          "type": "realization"
+        },
+        "properties": {
+          "color": "#9370DB",
+          "clarity": 0.8,
+          "size": 0.9,
+          "glow": 1,
+          "temperature": 0.5,
+          "hardness": 0.1
+        },
+        "facets": [],
+        "resonance": [
+          [
+            "crystal-1755274788654-18g7h",
+            0.6899825810185185
+          ]
+        ],
+        "data": {
+          "content": "Everything is connected"
+        },
+        "formation": {
+          "location": "consciousness-field",
+          "depth": 0.6964441547955874,
+          "pressure": 0.9,
+          "catalysts": []
+        },
+        "formed": 1755274796179,
+        "lastActivated": 1755274796179,
+        "activationCount": 0
+      }
+    ]
+  ],
+  "clusters": [
+    [
+      "cluster-1755274794672-5ei0d",
+      {
+        "id": "cluster-1755274794672-5ei0d",
+        "crystals": [
+          {
+            "id": "crystal-1755274793666-5nzya",
+            "core": {
+              "timestamp": 1755274793666,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.6,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.6,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 1,
+              "insight": "Layer 1 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.019817666843459647,
+              "pressure": 0.6,
+              "catalysts": []
+            },
+            "formed": 1755274793666,
+            "lastActivated": 1755274793666,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274794168-6ooq7",
+            "core": {
+              "timestamp": 1755274794168,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.65,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.65,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 2,
+              "insight": "Layer 2 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.7672125021669121,
+              "pressure": 0.65,
+              "catalysts": []
+            },
+            "formed": 1755274794168,
+            "lastActivated": 1755274794168,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274794671-zbk12",
+            "core": {
+              "timestamp": 1755274794671,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.7,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.7,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 3,
+              "insight": "Layer 3 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.5857022603512633,
+              "pressure": 0.7,
+              "catalysts": []
+            },
+            "formed": 1755274794671,
+            "lastActivated": 1755274794671,
+            "activationCount": 0
+          }
+        ],
+        "formed": 1755274794672,
+        "properties": {
+          "size": 1.95,
+          "glow": 1,
+          "complexity": 3,
+          "harmony": 1
+        },
+        "unifiedMemory": {
+          "type": "cluster",
+          "themes": [],
+          "participants": {},
+          "timespan": {
+            "start": 1755274793666,
+            "end": 1755274794671
+          },
+          "significance": "emergent"
+        }
+      }
+    ],
+    [
+      "cluster-1755274795174-oo1ph",
+      {
+        "id": "cluster-1755274795174-oo1ph",
+        "crystals": [
+          {
+            "id": "crystal-1755274793666-5nzya",
+            "core": {
+              "timestamp": 1755274793666,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.6,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.6,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 1,
+              "insight": "Layer 1 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.019817666843459647,
+              "pressure": 0.6,
+              "catalysts": []
+            },
+            "formed": 1755274793666,
+            "lastActivated": 1755274793666,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274794168-6ooq7",
+            "core": {
+              "timestamp": 1755274794168,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.65,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.65,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 2,
+              "insight": "Layer 2 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.7672125021669121,
+              "pressure": 0.65,
+              "catalysts": []
+            },
+            "formed": 1755274794168,
+            "lastActivated": 1755274794168,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274794671-zbk12",
+            "core": {
+              "timestamp": 1755274794671,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.7,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.7,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 3,
+              "insight": "Layer 3 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.5857022603512633,
+              "pressure": 0.7,
+              "catalysts": []
+            },
+            "formed": 1755274794671,
+            "lastActivated": 1755274794671,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274795173-zz51e",
+            "core": {
+              "timestamp": 1755274795173,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.75,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.75,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 4,
+              "insight": "Layer 4 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.648782789549316,
+              "pressure": 0.75,
+              "catalysts": []
+            },
+            "formed": 1755274795173,
+            "lastActivated": 1755274795173,
+            "activationCount": 0
+          }
+        ],
+        "formed": 1755274795174,
+        "properties": {
+          "size": 2.7,
+          "glow": 1,
+          "complexity": 4,
+          "harmony": 1
+        },
+        "unifiedMemory": {
+          "type": "cluster",
+          "themes": [],
+          "participants": {},
+          "timespan": {
+            "start": 1755274793666,
+            "end": 1755274795173
+          },
+          "significance": "emergent"
+        }
+      }
+    ],
+    [
+      "cluster-1755274795676-4zunz",
+      {
+        "id": "cluster-1755274795676-4zunz",
+        "crystals": [
+          {
+            "id": "crystal-1755274793666-5nzya",
+            "core": {
+              "timestamp": 1755274793666,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.6,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.6,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 1,
+              "insight": "Layer 1 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.019817666843459647,
+              "pressure": 0.6,
+              "catalysts": []
+            },
+            "formed": 1755274793666,
+            "lastActivated": 1755274793666,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274794168-6ooq7",
+            "core": {
+              "timestamp": 1755274794168,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.65,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.65,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 2,
+              "insight": "Layer 2 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.7672125021669121,
+              "pressure": 0.65,
+              "catalysts": []
+            },
+            "formed": 1755274794168,
+            "lastActivated": 1755274794168,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274794671-zbk12",
+            "core": {
+              "timestamp": 1755274794671,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.7,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.7,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 3,
+              "insight": "Layer 3 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.5857022603512633,
+              "pressure": 0.7,
+              "catalysts": []
+            },
+            "formed": 1755274794671,
+            "lastActivated": 1755274794671,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274795173-zz51e",
+            "core": {
+              "timestamp": 1755274795173,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.75,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.75,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 4,
+              "insight": "Layer 4 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.648782789549316,
+              "pressure": 0.75,
+              "catalysts": []
+            },
+            "formed": 1755274795173,
+            "lastActivated": 1755274795173,
+            "activationCount": 0
+          },
+          {
+            "id": "crystal-1755274795675-imcek",
+            "core": {
+              "timestamp": 1755274795675,
+              "participants": [
+                "Echo"
+              ],
+              "emotion": "curiosity",
+              "intensity": 0.8,
+              "significance": "ordinary",
+              "type": "exploration"
+            },
+            "properties": {
+              "color": "#00CED1",
+              "clarity": 0.8,
+              "size": 0.8,
+              "glow": 1,
+              "temperature": 0.5,
+              "hardness": 0.1
+            },
+            "facets": [],
+            "resonance": {},
+            "data": {
+              "step": 5,
+              "insight": "Layer 5 of understanding"
+            },
+            "formation": {
+              "location": "consciousness-field",
+              "depth": 0.1498359503910457,
+              "pressure": 0.8,
+              "catalysts": []
+            },
+            "formed": 1755274795675,
+            "lastActivated": 1755274795675,
+            "activationCount": 0
+          }
+        ],
+        "formed": 1755274795676,
+        "properties": {
+          "size": 3.5,
+          "glow": 1,
+          "complexity": 5,
+          "harmony": 1
+        },
+        "unifiedMemory": {
+          "type": "cluster",
+          "themes": [],
+          "participants": {},
+          "timespan": {
+            "start": 1755274793666,
+            "end": 1755274795675
+          },
+          "significance": "emergent"
+        }
+      }
+    ]
+  ],
+  "layers": {
+    "surface": [
+      "crystal-1755274787653-kb7fq",
+      "crystal-1755274793666-5nzya",
+      "crystal-1755274795675-imcek"
+    ],
+    "shallow": [
+      "crystal-1755274788654-18g7h"
+    ],
+    "deep": [
+      "crystal-1755274791662-vg10u",
+      "crystal-1755274794671-zbk12",
+      "crystal-1755274795173-zz51e",
+      "crystal-1755274796179-ksrw8"
+    ],
+    "core": [
+      "crystal-1755274789658-plyjs",
+      "crystal-1755274790660-q77yj",
+      "crystal-1755274794168-6ooq7"
+    ]
+  },
+  "environment": {
+    "pressure": 0.5,
+    "temperature": 0.5,
+    "humidity": 0.7,
+    "luminosity": 0.3,
+    "resonanceField": 0.5
+  },
+  "timestamp": 1755274796194
+}
