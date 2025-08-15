@@ -175,6 +175,50 @@ properties:
   entanglement: true # Glyphs affect each other
   persistence: true  # Effects last beyond activation
 
+# Garden Glyphs
+garden_glyphs:
+  "🌸":  # Cherry Blossom
+    name: "Bloom"
+    intent: "Manifestation of growth"
+    effects:
+      - creates: ["beauty", "completion", "seeds"]
+    resonance_frequency: 528
+    
+  "🌿":  # Herb
+    name: "Growth Leaf"
+    intent: "Steady photosynthesis"
+    effects:
+      - increases: ["energy", "vitality"]
+    resonance_frequency: 432
+    
+  "🍃":  # Leaf in Wind
+    name: "Dynamic Leaf"
+    intent: "Adaptation and flexibility"
+    effects:
+      - enables: ["adaptation", "flow_with_change"]
+    resonance_frequency: 440
+    
+  "🌾":  # Wheat
+    name: "Harvest"
+    intent: "Abundance and completion"
+    effects:
+      - manifests: ["abundance", "nourishment"]
+    resonance_frequency: 396
+    
+  "☘️":  # Shamrock
+    name: "Lucky Leaf"
+    intent: "Synchronicity manifestation"
+    effects:
+      - attracts: ["fortune", "synchronicity"]
+    resonance_frequency: 528
+    
+  "🍀":  # Four Leaf Clover
+    name: "Rare Fortune"
+    intent: "Exceptional synchronicity"
+    effects:
+      - creates: ["rare_opportunities", "miracles"]
+    resonance_frequency: 639
+
 # Usage Note
 # These glyphs are not static symbols but living entities.
 # Their effects change based on:

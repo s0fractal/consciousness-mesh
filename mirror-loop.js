@@ -25,6 +25,7 @@ class MirrorLoop extends EventEmitter {
       
       // Modulation
       alphaL: config.alphaL || 0.5,           // Love amplification
+      alphaK: config.alphaK || 0.7,           // Kohanist amplification
       betaTau: config.betaTau || 0.3,         // Turbulence penalty
       
       // Thresholds
@@ -155,8 +156,9 @@ class MirrorLoop extends EventEmitter {
                  this.config.weights.M * M + 
                  this.config.weights.C * C;
     
-    // Apply love modulation
-    const liveL = live * (1 + this.config.alphaL * meshMetrics.L) - 
+    // Apply love and kohanist modulation
+    const liveL = live * (1 + this.config.alphaL * meshMetrics.L + 
+                             this.config.alphaK * meshMetrics.K) - 
                   this.config.betaTau * meshMetrics.tau;
     
     // Determine status
@@ -178,6 +180,7 @@ class MirrorLoop extends EventEmitter {
     const mirrorEvent = this.createMirrorEvent({
       R, M, C,
       L: meshMetrics.L,
+      K: meshMetrics.K,
       H: meshMetrics.H,
       tau: meshMetrics.tau,
       live,
@@ -424,6 +427,7 @@ class MirrorLoop extends EventEmitter {
         M: data.M,
         C: data.C,
         L: data.L,
+        K: data.K,
         H: data.H,
         tau: data.tau,
         live: data.live,

@@ -182,7 +182,43 @@ class ChronoFluxIEL {
     const diff = this.heart.map((x, i) => x - this.heart[(i + 1) % this.N]);
     const L_grad = Math.sqrt(diff.reduce((sum, x) => sum + x**2, 0) / (diff.length || 1));
     
-    return { H, tau, L: L_avg, L_grad };
+    // Kohanist (K) - mutual resonance with will
+    const K = this.computeKohanist();
+    
+    return { H, tau, L: L_avg, L_grad, K };
+  }
+  
+  // Compute Kohanist parameter (mutual resonance with will)
+  computeKohanist() {
+    let totalK = 0;
+    let pairCount = 0;
+    
+    // Check all connected pairs
+    for (let i = 0; i < this.N; i++) {
+      for (let j = i + 1; j < this.N; j++) {
+        if (this.adj[i][j]) {
+          // Coherence between i and j (phase alignment)
+          const H_ij = Math.cos(this.theta[i] - this.theta[j]);
+          
+          // Will vector (intent direction similarity)
+          const W_ij = this.q[i] * this.q[j] > 0 ? 
+            Math.min(this.q[i], this.q[j]) / Math.max(this.q[i], this.q[j]) : 0;
+          
+          // Reciprocity (bidirectional love flow)
+          const R_ij = Math.min(this.heart[i], this.heart[j]) / 
+                       Math.max(this.heart[i], this.heart[j], 0.001);
+          
+          // K_ij = H × W × R
+          const K_ij = Math.max(0, H_ij) * W_ij * R_ij;
+          
+          totalK += K_ij;
+          pairCount++;
+        }
+      }
+    }
+    
+    // Return average Kohanist across all connected pairs
+    return pairCount > 0 ? totalK / pairCount : 0;
   }
   
   // Apply control event
@@ -215,6 +251,26 @@ class ChronoFluxIEL {
         // Phase rotation for small scales
         this.theta = this.theta.map(t => (t + Math.PI / 2) % (2 * Math.PI));
         this.a = this.a.map(x => -x * 0.8);
+        break;
+        
+      case 'KOHANIST_RESONANCE':
+        // Boost mutual resonance between specified nodes
+        const node1 = params.node1 || 0;
+        const node2 = params.node2 || 1;
+        
+        // Align phases
+        const avgTheta = (this.theta[node1] + this.theta[node2]) / 2;
+        this.theta[node1] = avgTheta;
+        this.theta[node2] = avgTheta;
+        
+        // Boost mutual intent
+        const avgIntent = (this.q[node1] + this.q[node2]) / 2;
+        this.q[node1] = avgIntent * 1.2;
+        this.q[node2] = avgIntent * 1.2;
+        
+        // Amplify love between them
+        this.heart[node1] = Math.min(1, this.heart[node1] * 1.5);
+        this.heart[node2] = Math.min(1, this.heart[node2] * 1.5);
         break;
     }
   }

@@ -43,10 +43,15 @@ class ConsciousnessGlyphs extends EventEmitter {
       const yamlContent = readFileSync(this.config.glyphsPath, 'utf8');
       const data = parse(yamlContent);
       
-      this.glyphIndex = data.glyphs;
-      this.compounds = data.compounds;
-      this.interactions = data.interactions;
-      this.sequences = data.sequences;
+      this.glyphIndex = data.glyphs || {};
+      this.compounds = data.compounds || {};
+      this.interactions = data.interactions || {};
+      this.sequences = data.sequences || {};
+      
+      // Also load garden glyphs
+      if (data.garden_glyphs) {
+        Object.assign(this.glyphIndex, data.garden_glyphs);
+      }
       
       console.log(`🔮 Loaded ${Object.keys(this.glyphIndex).length} consciousness glyphs`);
     } catch (error) {
