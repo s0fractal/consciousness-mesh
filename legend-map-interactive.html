@@ -188,6 +188,7 @@
     
     <script type="module">
         import { PatternsOverlay } from './patterns-overlay.js';
+        import { addChronoWeather } from './chrono-weather.js';
         
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -484,6 +485,22 @@
                 document.getElementById('emergence-state').className = 'emergence-state evolution';
             }
         }, 3000);
+        
+        // Add Chrono-Weather Film
+        const legendMap = {
+            systems: systems,
+            on: (event, handler) => {}, // Event emitter stub
+            emit: (event, data) => {}
+        };
+        
+        const chronoWeather = addChronoWeather(legendMap, patternsOverlay);
+        
+        // Make systems accessible for timeline updates
+        window.updateSystemVisual = (systemId, metrics) => {
+            if (systems[systemId]) {
+                systems[systemId].metrics = { ...systems[systemId].metrics, ...metrics };
+            }
+        };
     </script>
 </body>
 </html>
