@@ -58,18 +58,27 @@ class MirrorSnapshot {
   }
   
   // Lightweight format for transmission
-  toLightweight() {
-    return {
-      n: this.nodeId,
+  toLightweight(privacy = {}) {
+    const lightweight = {
+      n: privacy.anonymize ? this.hash : this.nodeId,
       t: this.timestamp,
       ps: {
-        id: this.perceivedState.identity,
+        id: privacy.hideIdentity ? 'anonymous' : this.perceivedState.identity,
         em: this.perceivedState.emotionalTone,
         en: this.perceivedState.energyLevel,
         cn: this.perceivedState.connections.length
       },
       h: this.hash
     };
+    
+    // Optional field filtering
+    if (privacy.excludeFields) {
+      for (const field of privacy.excludeFields) {
+        delete lightweight.ps[field];
+      }
+    }
+    
+    return lightweight;
   }
 }
 
@@ -282,15 +291,53 @@ class CollectiveMirror extends EventEmitter {
   }
   
   /**
-   * Switch view mode
+   * Switch view mode with optional transition
    */
-  setViewMode(mode) {
+  setViewMode(mode, options = {}) {
     if (['topography', 'semantic', 'affective'].includes(mode)) {
+      const oldMode = this.viewMode;
       this.viewMode = mode;
+      
+      // Emit transition event for fluid animations
+      if (options.transition) {
+        this.emit('view:transitioning', {
+          from: oldMode,
+          to: mode,
+          duration: options.duration || 1000
+        });
+      }
+      
       if (this.aggregatorRole) {
         this.updateAggregation();
       }
-      this.emit('view:changed', { mode });
+      
+      this.emit('view:changed', { mode, oldMode });
+    }
+  }
+  
+  /**
+   * Flow between views automatically
+   */
+  async startViewFlow(interval = 10000) {
+    const modes = ['topography', 'semantic', 'affective'];
+    let currentIndex = modes.indexOf(this.viewMode);
+    
+    this.viewFlowInterval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % modes.length;
+      this.setViewMode(modes[currentIndex], { transition: true });
+    }, interval);
+    
+    this.emit('flow:started', { interval });
+  }
+  
+  /**
+   * Stop view flow
+   */
+  stopViewFlow() {
+    if (this.viewFlowInterval) {
+      clearInterval(this.viewFlowInterval);
+      this.viewFlowInterval = null;
+      this.emit('flow:stopped');
     }
   }
   
