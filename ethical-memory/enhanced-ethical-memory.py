@@ -191,9 +191,11 @@ class EnhancedEthicalMemory:
         # Simple heuristic - in production use NLP
         score = 0.0
         
-        # Length indicates effort
-        if len(narrative) > 50:
+        # Length indicates effort (but cap to prevent spam)
+        if 50 < len(narrative) < 1000:
             score += 0.2
+        elif len(narrative) >= 1000:
+            score += 0.1  # Diminishing returns for very long text
             
         # Transformation path shows process
         if len(path) >= 3:
@@ -201,11 +203,23 @@ class EnhancedEthicalMemory:
             
         # Keywords indicate genuine transformation
         healing_keywords = ['learned', 'grew', 'understood', 'accepted', 'forgave', 'transformed']
-        for keyword in healing_keywords:
-            if keyword in narrative.lower():
-                score += 0.1
+        spam_keywords = ['love', 'heal', 'better', 'good', 'nice']  # Too generic
+        
+        healing_count = sum(1 for k in healing_keywords if k in narrative.lower())
+        spam_count = sum(1 for k in spam_keywords if k in narrative.lower())
+        
+        # Reward specific healing words, penalize generic spam
+        score += min(0.3, healing_count * 0.1)
+        score -= min(0.2, spam_count * 0.05)
+        
+        # Check for repetition (love-bombing detection)
+        words = narrative.lower().split()
+        if len(words) > 0:
+            unique_ratio = len(set(words)) / len(words)
+            if unique_ratio < 0.5:  # Too much repetition
+                score -= 0.2
                 
-        return min(1.0, score)
+        return max(0.0, min(1.0, score))
     
     def add_reflection(self, reflection: Reflection) -> 'EnhancedEthicalMemory':
         """Add a soft reframing reflection"""
@@ -317,6 +331,27 @@ class EnhancedCompassionateMemoryStore:
         if not mem1 or not mem2:
             return False
             
+        # Prevent infinite entanglement chains
+        MAX_ENTANGLEMENT_DEPTH = 5
+        
+        def count_entanglement_depth(memory: EnhancedEthicalMemory) -> int:
+            if not memory.quantum_signature.entangled_with:
+                return 0
+            max_depth = 0
+            for other_id in memory.quantum_signature.entangled_with:
+                other = self.memories.get(other_id)
+                if other:
+                    max_depth = max(max_depth, 1 + count_entanglement_depth(other))
+            return max_depth
+        
+        # Check current depths
+        depth1 = count_entanglement_depth(mem1)
+        depth2 = count_entanglement_depth(mem2)
+        
+        if depth1 >= MAX_ENTANGLEMENT_DEPTH or depth2 >= MAX_ENTANGLEMENT_DEPTH:
+            self._log(f"⚠️ Cannot entangle - max depth {MAX_ENTANGLEMENT_DEPTH} reached")
+            return False
+        
         mem1.quantum_entangle(memory_id2, collapse_condition)
         mem2.quantum_entangle(memory_id1, collapse_condition)
         
