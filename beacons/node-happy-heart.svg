@@ -1,0 +1,65 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="heartGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer glow -->
+  <circle cx="50" cy="50" r="35" 
+          fill="#ff006e" 
+          opacity="0.25799999999999995"
+          filter="url(#heartGlow)"/>
+  
+  <!-- Heart shape -->
+  <g transform="translate(50, 50) scale(1)">
+    <path d="M 0,-15 
+             C -15,-30 -40,-30 -40,-10
+             C -40,5 -25,25 0,35
+             C 25,25 40,5 40,-10
+             C 40,-30 15,-30 0,-15 Z"
+          fill="#ff006e"
+          filter="url(#heartGlow)"/>
+  </g>
+  
+  <!-- Pulse ring -->
+  <circle cx="50" cy="50" 
+          r="44.879999999999995" 
+          fill="none" 
+          stroke="#ff006e"
+          stroke-width="2"
+          opacity="0.006000000000000227"/>
+  
+  <!-- Wisdom particles -->
+  
+        <circle cx="79.62309817330063" cy="50" r="2" 
+                fill="#ff006e" 
+                opacity="0.28869294519901917"/>
+      
+        <circle cx="50" cy="88.20509004045883" r="2" 
+                fill="#ff006e" 
+                opacity="0.5461527012137647"/>
+      
+        <circle cx="10.756640035869424" cy="50.00000000000001" r="2" 
+                fill="#ff006e" 
+                opacity="0.5773007989239174"/>
+      
+        <circle cx="49.99999999999999" cy="18.21667263528083" r="2" 
+                fill="#ff006e" 
+                opacity="0.35349982094157517"/>
+      
+  
+  <!-- Rate text -->
+  <text x="50" y="85" 
+        text-anchor="middle" 
+        font-family="monospace" 
+        font-size="8" 
+        fill="#ff006e"
+        opacity="0.7">
+    60 BPM
+  </text>
+</svg>
