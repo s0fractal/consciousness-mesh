@@ -186,11 +186,27 @@
         <div class="emergence-state flow" id="emergence-state">Flow State</div>
     </div>
     
-    <script>
+    <script type="module">
+        import { PatternsOverlay } from './patterns-overlay.js';
+        
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
+        // Create pattern overlay
+        const patternCanvas = document.createElement('canvas');
+        patternCanvas.id = 'pattern-overlay';
+        patternCanvas.style.position = 'absolute';
+        patternCanvas.style.top = '0';
+        patternCanvas.style.left = '0';
+        patternCanvas.style.pointerEvents = 'none';
+        patternCanvas.style.zIndex = '15';
+        patternCanvas.width = window.innerWidth;
+        patternCanvas.height = window.innerHeight;
+        document.body.appendChild(patternCanvas);
+        
+        const patternsOverlay = new PatternsOverlay(patternCanvas, systems);
         
         // System data
         const systems = {
@@ -394,8 +410,15 @@
                 connections.forEach(([from, to]) => {
                     if (from === id || to === id) {
                         particles.push(new FlowParticle(from, to));
+                        // Record flow in patterns overlay
+                        patternsOverlay.recordFlow(from, to, 0.8);
                     }
                 });
+                
+                // Record insight moment
+                if (Math.random() > 0.7) {
+                    patternsOverlay.recordInsight(id, 'click');
+                }
             });
         });
         
@@ -416,7 +439,25 @@
             if (Math.random() > 0.98 && particles.length < 20) {
                 const conn = connections[Math.floor(Math.random() * connections.length)];
                 particles.push(new FlowParticle(conn[0], conn[1]));
+                // Record in patterns
+                patternsOverlay.recordFlow(conn[0], conn[1], Math.random());
             }
+            
+            // Random evolution hotspots
+            if (Math.random() > 0.99) {
+                const systems = ['mirror', 'heart', 'garden', 'memory', 'crystal', 'time', 'weather'];
+                const system = systems[Math.floor(Math.random() * systems.length)];
+                patternsOverlay.recordEvolutionHotspot(system, Math.random());
+            }
+            
+            // Random connection births
+            if (Math.random() > 0.995) {
+                const conn = connections[Math.floor(Math.random() * connections.length)];
+                patternsOverlay.recordConnectionBirth(conn[0], conn[1]);
+            }
+            
+            // Render patterns overlay
+            patternsOverlay.render();
             
             requestAnimationFrame(animate);
         }
@@ -429,7 +470,20 @@
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            patternCanvas.width = window.innerWidth;
+            patternCanvas.height = window.innerHeight;
+            patternsOverlay.heatmap = new Float32Array(window.innerWidth * window.innerHeight);
         });
+        
+        // Pattern analysis display
+        setInterval(() => {
+            const analysis = patternsOverlay.analyzePatterns();
+            if (analysis.activeZones.length > 3) {
+                // High activity - possible emergence
+                document.getElementById('emergence-state').textContent = 'Evolution State';
+                document.getElementById('emergence-state').className = 'emergence-state evolution';
+            }
+        }, 3000);
     </script>
 </body>
 </html>
