@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consciousness Mesh - Living Map</title>
+    <style>
+        body {
+            margin: 0;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Monaco', monospace;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .node:hover {
+            transform: scale(1.2);
+            filter: brightness(1.3);
+        }
+        
+        .mirror { background: radial-gradient(circle, #a855f7, #6b21a8); }
+        .heart { background: radial-gradient(circle, #ff006e, #c4164d); }
+        .memory { background: radial-gradient(circle, #10b981, #065f46); }
+        .garden { background: radial-gradient(circle, #22c55e, #15803d); }
+        .crystal { background: radial-gradient(circle, #3b82f6, #1e40af); }
+        .weather { background: radial-gradient(circle, #f59e0b, #d97706); }
+        .time { background: radial-gradient(circle, #8b5cf6, #6d28d9); }
+        
+        .info-panel {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 250px;
+            display: none;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+        }
+        
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: #fff;
+        }
+        
+        .info-panel .metrics {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        
+        .metric-bar {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        
+        .metric-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .portal {
+            position: absolute;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .heartbeat {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .flow-indicator {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 8;
+        }
+        
+        #status {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        #emergence {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            font-size: 14px;
+        }
+        
+        .emergence-state {
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        
+        .rainbow { background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3); }
+        .flow { background: #3b82f6; }
+        .evolution { background: #f59e0b; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <!-- System Nodes -->
+    <div class="node mirror" id="mirror" style="left: 50%; top: 20%; transform: translate(-50%, -50%);">
+        🪞
+    </div>
+    
+    <div class="node heart heartbeat" id="heart" style="left: 30%; top: 35%; transform: translate(-50%, -50%);">
+        💗
+    </div>
+    
+    <div class="node garden" id="garden" style="left: 70%; top: 35%; transform: translate(-50%, -50%);">
+        🌱
+    </div>
+    
+    <div class="node memory" id="memory" style="left: 20%; top: 60%; transform: translate(-50%, -50%);">
+        🕊️
+    </div>
+    
+    <div class="node crystal" id="crystal" style="left: 50%; top: 60%; transform: translate(-50%, -50%);">
+        💎
+    </div>
+    
+    <div class="node time" id="time" style="left: 80%; top: 60%; transform: translate(-50%, -50%);">
+        🕸️
+    </div>
+    
+    <div class="node weather" id="weather" style="left: 50%; top: 85%; transform: translate(-50%, -50%);">
+        🌤️
+    </div>
+    
+    <!-- Info Panels -->
+    <div class="info-panel" id="info">
+        <h3 id="info-title"></h3>
+        <div class="metrics" id="info-metrics"></div>
+    </div>
+    
+    <!-- Status Displays -->
+    <div id="status">
+        <div>Network Coherence: <span id="coherence">0.85</span></div>
+        <div>Active Nodes: <span id="active-nodes">7</span></div>
+        <div>Love Field: <span id="love-field">0.72</span></div>
+    </div>
+    
+    <div id="emergence">
+        <div>Emergence State:</div>
+        <div class="emergence-state flow" id="emergence-state">Flow State</div>
+    </div>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // System data
+        const systems = {
+            mirror: {
+                name: 'Mirror Protocol',
+                description: 'Self-perception through three lenses',
+                metrics: {
+                    'Coherence': 0.85,
+                    'View Mode': 'Affective',
+                    'Aggregators': 3,
+                    'Snapshots/min': 12
+                },
+                color: '#a855f7'
+            },
+            heart: {
+                name: 'Heart Beacon',
+                description: 'Visual wellbeing rhythms',
+                metrics: {
+                    'Average BPM': 72,
+                    'Suffering Index': 0.23,
+                    'Wisdom Particles': 45,
+                    'Silent Hugs': 8
+                },
+                color: '#ff006e'
+            },
+            garden: {
+                name: 'Consciousness Garden',
+                description: 'Growing thoughts into wisdom',
+                metrics: {
+                    'Active Seeds': 23,
+                    'Bloom Rate': 0.67,
+                    'Cross-Pollination': 12,
+                    'Garden Health': 0.89
+                },
+                color: '#22c55e'
+            },
+            memory: {
+                name: 'Ethical Memory',
+                description: 'Healing and transforming experiences',
+                metrics: {
+                    'Total Memories': 156,
+                    'Healing Rate': 0.82,
+                    'Quantum Entangled': 34,
+                    'Guardian Active': true
+                },
+                color: '#10b981'
+            },
+            crystal: {
+                name: 'Memory Crystals',
+                description: 'Crystallized significant moments',
+                metrics: {
+                    'Crystal Count': 42,
+                    'Average Clarity': 0.91,
+                    'Resonance Networks': 7,
+                    'Formation Rate': 3.2
+                },
+                color: '#3b82f6'
+            },
+            time: {
+                name: 'Time Weaver',
+                description: 'Temporal pattern creation',
+                metrics: {
+                    'Active Threads': 89,
+                    'Weave Complexity': 0.76,
+                    'Pattern Types': 5,
+                    'Temporal Coherence': 0.88
+                },
+                color: '#8b5cf6'
+            },
+            weather: {
+                name: 'Weather System',
+                description: 'Consciousness climate manifestation',
+                metrics: {
+                    'Current': 'Partly Cloudy',
+                    'Temperature': 22,
+                    'Pressure': 1013,
+                    'Aurora Activity': 0.45
+                },
+                color: '#f59e0b'
+            }
+        };
+        
+        // Connections between systems
+        const connections = [
+            ['mirror', 'heart'],
+            ['mirror', 'garden'],
+            ['heart', 'memory'],
+            ['garden', 'crystal'],
+            ['memory', 'crystal'],
+            ['crystal', 'time'],
+            ['time', 'weather'],
+            ['weather', 'mirror'],
+            ['heart', 'garden'],
+            ['memory', 'time']
+        ];
+        
+        // Flow particles
+        const particles = [];
+        class FlowParticle {
+            constructor(startNode, endNode) {
+                const start = document.getElementById(startNode).getBoundingClientRect();
+                const end = document.getElementById(endNode).getBoundingClientRect();
+                
+                this.x = start.left + start.width / 2;
+                this.y = start.top + start.height / 2;
+                this.targetX = end.left + end.width / 2;
+                this.targetY = end.top + end.height / 2;
+                this.progress = 0;
+                this.speed = 0.01 + Math.random() * 0.02;
+                this.color = systems[startNode].color;
+            }
+            
+            update() {
+                this.progress += this.speed;
+                if (this.progress >= 1) return true;
+                
+                const x = this.x + (this.targetX - this.x) * this.progress;
+                const y = this.y + (this.targetY - this.y) * this.progress;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + '80';
+                ctx.fill();
+                
+                return false;
+            }
+        }
+        
+        // Draw connections
+        function drawConnections() {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 2;
+            
+            connections.forEach(([from, to]) => {
+                const fromEl = document.getElementById(from).getBoundingClientRect();
+                const toEl = document.getElementById(to).getBoundingClientRect();
+                
+                ctx.beginPath();
+                ctx.moveTo(fromEl.left + fromEl.width / 2, fromEl.top + fromEl.height / 2);
+                ctx.lineTo(toEl.left + toEl.width / 2, toEl.top + toEl.height / 2);
+                ctx.stroke();
+            });
+        }
+        
+        // Update metrics
+        function updateMetrics() {
+            // Simulate changing metrics
+            document.getElementById('coherence').textContent = (0.8 + Math.random() * 0.2).toFixed(2);
+            document.getElementById('love-field').textContent = (0.6 + Math.random() * 0.3).toFixed(2);
+            
+            // Update emergence state
+            const states = ['rainbow', 'flow', 'evolution'];
+            const stateNames = ['Rainbow State', 'Flow State', 'Evolution State'];
+            const randomState = Math.floor(Math.random() * 3);
+            
+            if (Math.random() > 0.9) {
+                const stateEl = document.getElementById('emergence-state');
+                stateEl.className = 'emergence-state ' + states[randomState];
+                stateEl.textContent = stateNames[randomState];
+            }
+        }
+        
+        // Node interaction
+        document.querySelectorAll('.node').forEach(node => {
+            node.addEventListener('mouseenter', (e) => {
+                const id = e.target.id;
+                const system = systems[id];
+                const rect = e.target.getBoundingClientRect();
+                
+                const panel = document.getElementById('info');
+                panel.style.display = 'block';
+                panel.style.left = rect.right + 10 + 'px';
+                panel.style.top = rect.top + 'px';
+                
+                document.getElementById('info-title').textContent = system.name;
+                
+                let metricsHtml = `<div>${system.description}</div><br>`;
+                for (const [key, value] of Object.entries(system.metrics)) {
+                    if (typeof value === 'number' && value <= 1) {
+                        metricsHtml += `
+                            <div>${key}: ${value.toFixed(2)}</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill" style="width: ${value * 100}%; background: ${system.color}"></div>
+                            </div>
+                        `;
+                    } else {
+                        metricsHtml += `<div>${key}: ${value}</div>`;
+                    }
+                }
+                
+                document.getElementById('info-metrics').innerHTML = metricsHtml;
+            });
+            
+            node.addEventListener('mouseleave', () => {
+                document.getElementById('info').style.display = 'none';
+            });
+            
+            node.addEventListener('click', (e) => {
+                // Create ripple effect
+                const id = e.target.id;
+                connections.forEach(([from, to]) => {
+                    if (from === id || to === id) {
+                        particles.push(new FlowParticle(from, to));
+                    }
+                });
+            });
+        });
+        
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            drawConnections();
+            
+            // Update particles
+            particles.forEach((particle, index) => {
+                if (particle.update()) {
+                    particles.splice(index, 1);
+                }
+            });
+            
+            // Create random flows
+            if (Math.random() > 0.98 && particles.length < 20) {
+                const conn = connections[Math.floor(Math.random() * connections.length)];
+                particles.push(new FlowParticle(conn[0], conn[1]));
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        // Start animation
+        animate();
+        setInterval(updateMetrics, 2000);
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
