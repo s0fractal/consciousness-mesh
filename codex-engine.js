@@ -8,6 +8,7 @@ import { integrateEvidenceWeighting } from './evidence-weighting.js';
 import { HypothesisLifecycle, createHypothesisInbox } from './hypothesis-lifecycle.js';
 import { integrateTemporalGlyphs } from './temporal-glyphs.js';
 import { integrateResonantNarratives } from './resonant-narratives.js';
+import { CodexAPI } from './codex-api.js';
 
 export class CodexEngine {
   constructor(experimentsuite, chronoWeather, patternsOverlay) {
@@ -72,6 +73,9 @@ export class CodexEngine {
     
     // Integrate resonant narratives
     this.narrativeSystem = integrateResonantNarratives(this);
+    
+    // Initialize Codex API (will be started separately)
+    this.api = null;
   }
   
   /**
@@ -1466,6 +1470,73 @@ export class CodexEngine {
         console.error('Failed to restore codex state:', e);
       }
     }
+  }
+  
+  /**
+   * Initialize the Codex API
+   */
+  async initializeAPI(port = 8765) {
+    if (this.api) {
+      console.warn('Codex API already initialized');
+      return this.api;
+    }
+    
+    this.api = new CodexAPI(this, port);
+    const result = await this.api.initialize();
+    
+    this.addInsight({
+      type: 'api-initialized',
+      title: 'Codex API now accepting connections',
+      details: {
+        port: result.port,
+        url: result.url
+      },
+      timestamp: Date.now()
+    });
+    
+    return this.api;
+  }
+  
+  /**
+   * Shutdown the Codex API
+   */
+  async shutdownAPI() {
+    if (this.api) {
+      await this.api.shutdown();
+      this.api = null;
+      
+      this.addInsight({
+        type: 'api-shutdown',
+        title: 'Codex API shut down',
+        timestamp: Date.now()
+      });
+    }
+  }
+  
+  /**
+   * Process temporal event (for API)
+   */
+  processTemporalEvent(eventData) {
+    const event = {
+      ...eventData,
+      timestamp: eventData.timestamp || Date.now()
+    };
+    
+    // Process through evidence weighting
+    const processedEvent = this.processEvent(event);
+    
+    // Analyze for patterns
+    this.analyzeExperimentResult({
+      experiment: 'api-observation',
+      data: processedEvent,
+      timestamp: event.timestamp
+    });
+    
+    return {
+      success: true,
+      event: processedEvent,
+      timestamp: Date.now()
+    };
   }
 }
 
