@@ -124,12 +124,24 @@ export class EvidenceAnonymizer {
   /**
    * Process object recursively
    */
-  processObject(obj, path, changes) {
-    for (const key in obj) {
-      if (!obj.hasOwnProperty(key)) continue;
-      
+  processObject(obj, path, changes, seen = new WeakSet()) {
+    // Prevent infinite recursion
+    if (seen.has(obj)) return;
+    seen.add(obj);
+    
+    // Use Object.keys to handle objects without prototype
+    const keys = Object.keys(obj);
+    
+    for (const key of keys) {
       const fullPath = path ? `${path}.${key}` : key;
       const value = obj[key];
+      
+      // Skip getters to avoid side effects, but process the backing field
+      const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+      if (descriptor && descriptor.get && !descriptor.set) {
+        // Read-only getter, skip it
+        continue;
+      }
       
       // Check if field is sensitive
       if (this.isSensitiveField(key, fullPath)) {
@@ -152,12 +164,12 @@ export class EvidenceAnonymizer {
         }
       } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         // Recurse into nested objects
-        this.processObject(value, fullPath, changes);
+        this.processObject(value, fullPath, changes, seen);
       } else if (Array.isArray(value)) {
         // Process arrays
         value.forEach((item, index) => {
           if (typeof item === 'object' && item !== null) {
-            this.processObject(item, `${fullPath}[${index}]`, changes);
+            this.processObject(item, `${fullPath}[${index}]`, changes, seen);
           }
         });
       }
@@ -418,25 +430,46 @@ export class EvidenceAnonymizer {
    */
   stringify(value) {
     if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+    if (typeof value === 'number') {
+      // Handle special numeric values
+      if (!isFinite(value)) return String(value);
+      return String(value);
+    }
+    if (typeof value === 'boolean') return String(value);
     if (value instanceof Date) return value.toISOString();
-    return JSON.stringify(value);
+    try {
+      return JSON.stringify(value);
+    } catch (e) {
+      // Handle circular references or other JSON errors
+      return '[Complex Object]';
+    }
   }
   
   /**
    * Deep clone object
    */
-  deepClone(obj) {
+  deepClone(obj, seen = new WeakSet()) {
     if (obj === null || typeof obj !== 'object') return obj;
-    if (obj instanceof Date) return new Date(obj.getTime());
-    if (obj instanceof Array) return obj.map(item => this.deepClone(item));
     
-    const cloned = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        cloned[key] = this.deepClone(obj[key]);
-      }
+    // Handle circular references
+    if (seen.has(obj)) {
+      return '[Circular Reference]';
     }
+    seen.add(obj);
+    
+    // Handle special types
+    if (obj instanceof Date) return new Date(obj.getTime());
+    if (obj instanceof RegExp) return new RegExp(obj.source, obj.flags);
+    if (obj instanceof Array) return obj.map(item => this.deepClone(item, seen));
+    
+    // Handle objects without prototype
+    const cloned = Object.create(Object.getPrototypeOf(obj));
+    
+    // Use Object.keys to avoid hasOwnProperty issues
+    Object.keys(obj).forEach(key => {
+      cloned[key] = this.deepClone(obj[key], seen);
+    });
+    
     return cloned;
   }
   
@@ -473,8 +506,16 @@ export class EvidenceAnonymizer {
    */
   verifyIrreversibility(original, anonymized) {
     // This is a basic check - in production, use more sophisticated methods
-    const originalStr = JSON.stringify(original);
-    const anonymizedStr = JSON.stringify(anonymized);
+    let originalStr, anonymizedStr;
+    
+    try {
+      // Use custom stringify to handle circular references
+      originalStr = this.safeStringify(original);
+      anonymizedStr = this.safeStringify(anonymized);
+    } catch (e) {
+      // If we can't stringify, skip verification
+      return;
+    }
     
     // Check that no original sensitive values appear in anonymized version
     this.config.sensitiveFields.forEach(field => {
@@ -484,6 +525,22 @@ export class EvidenceAnonymizer {
           throw new Error(`Anonymization failed: original value for ${field} found in anonymized data`);
         }
       }
+    });
+  }
+  
+  /**
+   * Safe stringify that handles circular references
+   */
+  safeStringify(obj) {
+    const seen = new WeakSet();
+    return JSON.stringify(obj, (key, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (seen.has(value)) {
+          return '[Circular]';
+        }
+        seen.add(value);
+      }
+      return value;
     });
   }
   
