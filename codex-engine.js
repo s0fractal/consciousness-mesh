@@ -8,6 +8,7 @@ import { integrateEvidenceWeighting } from './evidence-weighting.js';
 import { HypothesisLifecycle, createHypothesisInbox } from './hypothesis-lifecycle.js';
 import { integrateTemporalGlyphs } from './temporal-glyphs.js';
 import { integrateResonantNarratives } from './resonant-narratives.js';
+import { integrateExplainabilityHooks } from './explainability-hooks.js';
 import { CodexAPI } from './codex-api.js';
 
 export class CodexEngine {
@@ -73,6 +74,9 @@ export class CodexEngine {
     
     // Integrate resonant narratives
     this.narrativeSystem = integrateResonantNarratives(this);
+    
+    // Integrate explainability hooks
+    this.explainabilityHooks = integrateExplainabilityHooks(this);
     
     // Initialize Codex API (will be started separately)
     this.api = null;
