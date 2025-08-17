@@ -4,6 +4,7 @@
  */
 
 import { integrateCalibration } from './confidence-calibration.js';
+import { integrateEvidenceWeighting } from './evidence-weighting.js';
 
 export class CodexEngine {
   constructor(experimentsuite, chronoWeather, patternsOverlay) {
@@ -55,6 +56,25 @@ export class CodexEngine {
     
     // Integrate confidence calibration
     this.calibration = integrateCalibration(this);
+    
+    // Integrate evidence weighting
+    this.evidenceWeighting = integrateEvidenceWeighting(this);
+  }
+  
+  /**
+   * Process an event with evidence weighting
+   */
+  processEvent(event) {
+    // This will be enhanced by integrateEvidenceWeighting
+    return event;
+  }
+  
+  /**
+   * Update parameters with evidence weighting
+   */
+  updateParameters(params, update, event) {
+    // This will be enhanced by integrateEvidenceWeighting
+    return { ...params, ...update };
   }
   
   /**
@@ -188,23 +208,38 @@ export class CodexEngine {
     const expectedIntensities = speeds.map(s => Math.sqrt(parseFloat(s)));
     const correlation = this.calculateCorrelation(intensities, expectedIntensities);
     
-    // Set current law for calibration
-    this.currentLawId = 'rhythmic-resonance';
+    // Calculate signal and noise for evidence weighting
+    const signal = Math.abs(correlation) * 100; // Correlation strength as signal
+    const noise = this.calculateNoise(intensities, expectedIntensities);
     
-    // Update law confidence with calibration
-    const law = this.codex.laws.get('rhythmic-resonance');
-    law.evidence.push({
+    // Create evidence with weight
+    const evidence = {
       timestamp: Date.now(),
       correlation: correlation,
       data: { speeds, intensities },
       predicted: expectedIntensities,
-      actual: intensities
-    });
+      actual: intensities,
+      signal: signal,
+      noise: noise,
+      type: correlation > 0.9 ? 'confirmation' : correlation < 0.5 ? 'contradiction' : 'routine'
+    };
     
-    // Use calibrated confidence update
+    // Calculate evidence weight
+    const weightRecord = this.evidenceWeighting.calculateEventWeight(evidence);
+    evidence.weight = weightRecord.finalWeight;
+    
+    // Set current law for calibration
+    this.currentLawId = 'rhythmic-resonance';
+    
+    // Update law confidence with calibration and weighting
+    const law = this.codex.laws.get('rhythmic-resonance');
+    law.evidence.push(evidence);
+    
+    // Use weighted calibrated confidence update
     law.confidence = this.updateConfidence(law.confidence, {
       predicted: expectedIntensities[expectedIntensities.length - 1],
-      actual: intensities[intensities.length - 1]
+      actual: intensities[intensities.length - 1],
+      weight: evidence.weight
     });
     
     // Check for new sub-patterns
@@ -712,6 +747,23 @@ export class CodexEngine {
       Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
     
     return isNaN(correlation) ? 0 : correlation;
+  }
+  
+  calculateNoise(actual, expected) {
+    if (actual.length !== expected.length || actual.length === 0) return 1;
+    
+    // Calculate mean squared error as noise
+    const mse = actual.reduce((sum, val, i) => {
+      const error = val - expected[i];
+      return sum + error * error;
+    }, 0) / actual.length;
+    
+    // Normalize by expected range
+    const expectedRange = Math.max(...expected) - Math.min(...expected) || 1;
+    const normalizedNoise = Math.sqrt(mse) / expectedRange;
+    
+    // Ensure minimum noise floor
+    return Math.max(0.01, normalizedNoise);
   }
   
   updateConfidence(current, newEvidence) {
