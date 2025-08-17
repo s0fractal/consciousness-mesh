@@ -7,6 +7,7 @@ import { integrateCalibration } from './confidence-calibration.js';
 import { integrateEvidenceWeighting } from './evidence-weighting.js';
 import { HypothesisLifecycle, createHypothesisInbox } from './hypothesis-lifecycle.js';
 import { integrateTemporalGlyphs } from './temporal-glyphs.js';
+import { integrateResonantNarratives } from './resonant-narratives.js';
 
 export class CodexEngine {
   constructor(experimentsuite, chronoWeather, patternsOverlay) {
@@ -68,6 +69,9 @@ export class CodexEngine {
     
     // Integrate temporal glyphs
     this.glyphSystem = integrateTemporalGlyphs(this);
+    
+    // Integrate resonant narratives
+    this.narrativeSystem = integrateResonantNarratives(this);
   }
   
   /**
@@ -484,6 +488,14 @@ export class CodexEngine {
           cursor: pointer;
           border-bottom: 2px solid transparent;
         ">Glyphs</button>
+        <button class="codex-tab" data-tab="narratives" style="
+          background: none;
+          border: none;
+          color: #94a3b8;
+          padding: 8px 16px;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+        ">Narratives</button>
       </div>
       
       <div id="codex-content">
@@ -491,6 +503,7 @@ export class CodexEngine {
         <div id="codex-patterns" class="codex-panel" style="display: none;"></div>
         <div id="codex-insights" class="codex-panel" style="display: none;"></div>
         <div id="codex-glyphs" class="codex-panel" style="display: none;"></div>
+        <div id="codex-narratives" class="codex-panel" style="display: none;"></div>
       </div>
       
       <button id="codex-close" style="
@@ -613,6 +626,9 @@ export class CodexEngine {
     
     // Render glyphs
     this.renderGlyphs();
+    
+    // Render narratives
+    this.renderNarratives();
   }
   
   /**
@@ -902,6 +918,239 @@ export class CodexEngine {
         container.appendChild(clonedSvg);
       }
     });
+  }
+  
+  /**
+   * Render resonant narratives
+   */
+  renderNarratives() {
+    const container = document.getElementById('codex-narratives');
+    const narratives = Array.from(this.codex.narratives.values());
+    
+    if (narratives.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; color: #666; padding: 40px;">
+          <div style="font-size: 40px; margin-bottom: 10px;">📚</div>
+          <div>No narratives generated yet.</div>
+          <div style="font-size: 12px; margin-top: 5px;">Narratives will appear as laws are discovered.</div>
+        </div>
+      `;
+      return;
+    }
+    
+    // Create narrative cards
+    container.innerHTML = `
+      <div style="padding: 10px;">
+        ${narratives.map(narrative => {
+          const law = this.codex.laws.get(narrative.lawId);
+          if (!law) return '';
+          
+          return `
+            <div style="
+              margin-bottom: 20px;
+              background: rgba(45, 45, 45, 0.8);
+              border-radius: 8px;
+              overflow: hidden;
+              transition: all 0.3s;
+            " 
+            onmouseenter="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 20px rgba(139, 92, 246, 0.3)';"
+            onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+              
+              <div style="
+                padding: 15px 20px;
+                background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(109, 40, 217, 0.2));
+                border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+              ">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <h3 style="margin: 0; color: #e0e7ff; font-size: 18px;">
+                    ${law.glyph} ${law.name}
+                  </h3>
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <span style="
+                      font-size: 12px;
+                      padding: 4px 8px;
+                      background: rgba(139, 92, 246, 0.2);
+                      border-radius: 4px;
+                      color: #a78bfa;
+                    ">v${narrative.version}</span>
+                    <span style="
+                      font-size: 12px;
+                      color: #94a3b8;
+                    ">${(law.confidence * 100).toFixed(1)}% confidence</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div style="padding: 20px;">
+                <div style="
+                  max-height: 200px;
+                  overflow-y: auto;
+                  color: #d1d5db;
+                  font-size: 14px;
+                  line-height: 1.6;
+                  white-space: pre-wrap;
+                " id="narrative-preview-${narrative.lawId}">
+                  ${this.extractNarrativePreview(narrative)}
+                </div>
+                
+                <div style="
+                  margin-top: 15px;
+                  display: flex;
+                  gap: 10px;
+                  justify-content: space-between;
+                  align-items: center;
+                ">
+                  <div style="
+                    font-size: 11px;
+                    color: #666;
+                  ">
+                    ${narrative.evidence} evidence points • 
+                    ${narrative.metaphors.length} metaphors • 
+                    Generated ${this.formatTime(Date.now() - narrative.created)} ago
+                  </div>
+                  
+                  <div style="display: flex; gap: 8px;">
+                    <button style="
+                      background: rgba(59, 130, 246, 0.2);
+                      border: none;
+                      border-radius: 4px;
+                      color: #60a5fa;
+                      font-size: 12px;
+                      padding: 6px 12px;
+                      cursor: pointer;
+                      transition: all 0.2s;
+                    "
+                    onmouseenter="this.style.background='rgba(59, 130, 246, 0.3)';"
+                    onmouseleave="this.style.background='rgba(59, 130, 246, 0.2)';"
+                    onclick="window.codexEngine.showFullNarrative('${narrative.lawId}')">
+                      Read Full
+                    </button>
+                    
+                    <button style="
+                      background: rgba(16, 185, 129, 0.2);
+                      border: none;
+                      border-radius: 4px;
+                      color: #34d399;
+                      font-size: 12px;
+                      padding: 6px 12px;
+                      cursor: pointer;
+                      transition: all 0.2s;
+                    "
+                    onmouseenter="this.style.background='rgba(16, 185, 129, 0.3)';"
+                    onmouseleave="this.style.background='rgba(16, 185, 129, 0.2)';"
+                    onclick="window.codexEngine.exportNarrative('${narrative.lawId}', 'markdown')">
+                      Export
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+  
+  /**
+   * Extract narrative preview
+   */
+  extractNarrativePreview(narrative) {
+    // Get introduction and first part of discovery
+    const sections = narrative.text.split('\n\n');
+    const preview = sections.slice(1, 3).join('\n\n');
+    
+    // Limit to 300 characters
+    if (preview.length > 300) {
+      return preview.substring(0, 297) + '...';
+    }
+    
+    return preview;
+  }
+  
+  /**
+   * Show full narrative in modal
+   */
+  showFullNarrative(lawId) {
+    const narrative = this.codex.narratives.get(lawId);
+    if (!narrative) return;
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    `;
+    
+    modal.innerHTML = `
+      <div style="
+        background: #1a1a1a;
+        border-radius: 12px;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      ">
+        <div style="
+          padding: 20px;
+          border-bottom: 1px solid #333;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        ">
+          <h2 style="margin: 0; color: #e0e7ff;">Resonant Narrative</h2>
+          <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 24px;
+            cursor: pointer;
+          ">×</button>
+        </div>
+        
+        <div style="
+          padding: 30px;
+          overflow-y: auto;
+          color: #d1d5db;
+          font-size: 14px;
+          line-height: 1.8;
+          white-space: pre-wrap;
+        ">
+          ${this.formatNarrativeHTML(narrative.text)}
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  }
+  
+  /**
+   * Format narrative text as HTML
+   */
+  formatNarrativeHTML(text) {
+    return text
+      .replace(/^# (.*$)/gim, '<h1 style="color: #e0e7ff; margin: 20px 0;">$1</h1>')
+      .replace(/^## (.*$)/gim, '<h2 style="color: #a78bfa; margin: 15px 0;">$1</h2>')
+      .replace(/^### (.*$)/gim, '<h3 style="color: #8b5cf6; margin: 10px 0;">$1</h3>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #f3f4f6;">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/---/g, '<hr style="border: none; border-top: 1px solid #333; margin: 20px 0;">');
   }
   
   /**
