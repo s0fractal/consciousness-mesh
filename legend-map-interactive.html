@@ -501,6 +501,14 @@
                 systems[systemId].metrics = { ...systems[systemId].metrics, ...metrics };
             }
         };
+        
+        // Add Temporal Experiments Suite
+        import { addTemporalExperiments } from './temporal-experiments.js';
+        const experimentsuite = addTemporalExperiments(chronoWeather, patternsOverlay, legendMap);
+        
+        // Add Codex Engine
+        import { createCodexEngine } from './codex-engine.js';
+        const codexEngine = createCodexEngine(experimentsuite, chronoWeather, patternsOverlay);
     </script>
 </body>
 </html>
