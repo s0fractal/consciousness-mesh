@@ -6,6 +6,7 @@
 import { integrateCalibration } from './confidence-calibration.js';
 import { integrateEvidenceWeighting } from './evidence-weighting.js';
 import { HypothesisLifecycle, createHypothesisInbox } from './hypothesis-lifecycle.js';
+import { integrateTemporalGlyphs } from './temporal-glyphs.js';
 
 export class CodexEngine {
   constructor(experimentsuite, chronoWeather, patternsOverlay) {
@@ -64,6 +65,9 @@ export class CodexEngine {
     // Initialize hypothesis lifecycle
     this.hypothesisLifecycle = new HypothesisLifecycle();
     this.setupHypothesisIntegration();
+    
+    // Integrate temporal glyphs
+    this.glyphSystem = integrateTemporalGlyphs(this);
   }
   
   /**
@@ -322,6 +326,41 @@ export class CodexEngine {
   }
   
   /**
+   * Add new discovered law
+   */
+  addNewLaw(id, lawData) {
+    if (!this.codex.laws.has(id)) {
+      this.codex.laws.set(id, {
+        id,
+        name: lawData.name,
+        formula: lawData.formula,
+        description: lawData.description,
+        confidence: lawData.confidence || 0.5,
+        evidence: [],
+        discovered: Date.now(),
+        glyph: lawData.glyph || '🔮',
+        parameters: lawData.parameters || {}
+      });
+      
+      // Create insight
+      this.addInsight({
+        type: 'law-discovery',
+        title: `New Law: ${lawData.name}`,
+        details: {
+          formula: lawData.formula,
+          confidence: lawData.confidence
+        },
+        timestamp: Date.now()
+      });
+      
+      // Trigger UI update
+      this.updateCodexDisplay();
+    }
+    
+    return this.codex.laws.get(id);
+  }
+  
+  /**
    * Evolution loop - periodic analysis and updates
    */
   startEvolutionLoop() {
@@ -437,12 +476,21 @@ export class CodexEngine {
           cursor: pointer;
           border-bottom: 2px solid transparent;
         ">Insights</button>
+        <button class="codex-tab" data-tab="glyphs" style="
+          background: none;
+          border: none;
+          color: #94a3b8;
+          padding: 8px 16px;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+        ">Glyphs</button>
       </div>
       
       <div id="codex-content">
         <div id="codex-laws" class="codex-panel"></div>
         <div id="codex-patterns" class="codex-panel" style="display: none;"></div>
         <div id="codex-insights" class="codex-panel" style="display: none;"></div>
+        <div id="codex-glyphs" class="codex-panel" style="display: none;"></div>
       </div>
       
       <button id="codex-close" style="
@@ -562,6 +610,9 @@ export class CodexEngine {
     
     // Render insights
     this.renderInsights();
+    
+    // Render glyphs
+    this.renderGlyphs();
   }
   
   /**
@@ -733,6 +784,124 @@ export class CodexEngine {
         ` : ''}
       </div>
     `).join('');
+  }
+  
+  /**
+   * Render temporal glyphs
+   */
+  renderGlyphs() {
+    const container = document.getElementById('codex-glyphs');
+    const glyphs = Array.from(this.codex.glyphs.values());
+    
+    if (glyphs.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; color: #666; padding: 40px;">
+          <div style="font-size: 40px; margin-bottom: 10px;">🎨</div>
+          <div>No glyphs generated yet.</div>
+          <div style="font-size: 12px; margin-top: 5px;">Glyphs will appear as laws are discovered.</div>
+        </div>
+      `;
+      return;
+    }
+    
+    // Create glyph grid
+    container.innerHTML = `
+      <div style="
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+        padding: 10px;
+      ">
+        ${glyphs.map(glyphData => {
+          const law = glyphData.law;
+          return `
+            <div style="
+              background: rgba(45, 45, 45, 0.8);
+              border-radius: 8px;
+              padding: 10px;
+              text-align: center;
+              transition: all 0.3s;
+              cursor: pointer;
+              position: relative;
+              overflow: hidden;
+            " 
+            onmouseenter="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 20px rgba(139, 92, 246, 0.3)';"
+            onmouseleave="this.style.transform='scale(1)'; this.style.boxShadow='none';">
+              
+              <div style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100px;
+                margin-bottom: 8px;
+              " id="glyph-container-${law.id}">
+                <!-- SVG will be inserted here -->
+              </div>
+              
+              <div style="
+                font-size: 12px;
+                font-weight: bold;
+                color: #e0e7ff;
+                margin-bottom: 4px;
+              ">${law.name}</div>
+              
+              <div style="
+                font-size: 10px;
+                color: #94a3b8;
+              ">Confidence: ${(law.confidence * 100).toFixed(1)}%</div>
+              
+              <div style="
+                width: 100%;
+                height: 3px;
+                background: #333;
+                border-radius: 2px;
+                margin-top: 6px;
+                overflow: hidden;
+              ">
+                <div style="
+                  height: 100%;
+                  width: ${law.confidence * 100}%;
+                  background: linear-gradient(90deg, #8b5cf6, #6d28d9);
+                  transition: width 0.5s;
+                "></div>
+              </div>
+              
+              <button style="
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                background: rgba(139, 92, 246, 0.2);
+                border: none;
+                border-radius: 4px;
+                color: #a78bfa;
+                font-size: 10px;
+                padding: 2px 6px;
+                cursor: pointer;
+                opacity: 0;
+                transition: opacity 0.3s;
+              "
+              onmouseenter="this.style.opacity='1';"
+              onmouseleave="this.style.opacity='0';"
+              onclick="window.codexEngine.exportGlyph('${law.id}')">
+                Export
+              </button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    
+    // Insert actual SVG glyphs
+    glyphs.forEach(glyphData => {
+      const container = document.getElementById(`glyph-container-${glyphData.law.id}`);
+      if (container && glyphData.svg) {
+        // Scale down the SVG for the grid view
+        const clonedSvg = glyphData.svg.cloneNode(true);
+        clonedSvg.setAttribute('width', '100');
+        clonedSvg.setAttribute('height', '100');
+        container.appendChild(clonedSvg);
+      }
+    });
   }
   
   /**
@@ -1057,6 +1226,9 @@ export function createCodexEngine(experimentsuite, chronoWeather, patternsOverla
   
   // Restore previous state if available
   engine.loadCodexState();
+  
+  // Make engine accessible for UI interactions
+  window.codexEngine = engine;
   
   return engine;
 }
