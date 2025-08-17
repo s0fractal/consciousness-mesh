@@ -1,0 +1,449 @@
+/**
+ * CSS Styles for Calibrated Confidence Meter
+ * Dual-layer confidence scale with responsive design
+ */
+
+/* Base meter styles */
+.calibrated-confidence-meter {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: rgba(20, 25, 40, 0.95);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.calibrated-confidence-meter:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 40px rgba(139, 92, 246, 0.2),
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-color: rgba(139, 92, 246, 0.6);
+}
+
+/* Header styles */
+.confidence-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.05));
+}
+
+.confidence-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confidence-values {
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Menlo', monospace;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* Bar container styles */
+.confidence-bar-container {
+  padding: 12px 20px;
+  position: relative;
+}
+
+.confidence-bar-container:first-of-type {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(220, 38, 38, 0.02));
+}
+
+.confidence-bar-container:last-of-type {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.02));
+}
+
+/* Bar track styles */
+.confidence-bar-track {
+  position: relative;
+  background: rgba(55, 65, 81, 0.8);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(75, 85, 99, 0.5);
+  transition: all 0.3s ease;
+}
+
+.confidence-bar-track:hover {
+  border-color: rgba(139, 92, 246, 0.8);
+  box-shadow: 
+    0 0 20px rgba(139, 92, 246, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Bar fill styles */
+.confidence-bar-fill {
+  position: relative;
+  background: linear-gradient(90deg, var(--bar-color-start), var(--bar-color-end));
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+/* Raw confidence bar colors */
+.confidence-raw .confidence-bar-fill {
+  --bar-color-start: #ef4444;
+  --bar-color-end: #dc2626;
+}
+
+.confidence-raw .confidence-bar-fill[data-level="medium"] {
+  --bar-color-start: #f59e0b;
+  --bar-color-end: #d97706;
+}
+
+.confidence-raw .confidence-bar-fill[data-level="high"] {
+  --bar-color-start: #10b981;
+  --bar-color-end: #059669;
+}
+
+/* Calibrated confidence bar colors */
+.confidence-calibrated .confidence-bar-fill {
+  --bar-color-start: #dc2626;
+  --bar-color-end: #b91c1c;
+}
+
+.confidence-calibrated .confidence-bar-fill[data-level="medium"] {
+  --bar-color-start: #d97706;
+  --bar-color-end: #b45309;
+}
+
+.confidence-calibrated .confidence-bar-fill[data-level="high"] {
+  --bar-color-start: #059669;
+  --bar-color-end: #047857;
+}
+
+/* Shimmer animation */
+.confidence-bar-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 3s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+  0% { 
+    left: -100%; 
+    opacity: 0;
+  }
+  50% { 
+    opacity: 1;
+  }
+  100% { 
+    left: 100%; 
+    opacity: 0;
+  }
+}
+
+/* Value display styles */
+.confidence-value {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.8),
+    0 0 8px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.5px;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+/* Bar labels */
+.confidence-bar-container label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d1d5db;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.confidence-raw label {
+  color: #fca5a5;
+}
+
+.confidence-calibrated label {
+  color: #86efac;
+}
+
+/* Delta indicator styles */
+.confidence-delta {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.05));
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.delta-icon {
+  font-size: 14px;
+  animation: pulse-icon 2s infinite ease-in-out;
+}
+
+@keyframes pulse-icon {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+.delta-text {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'Fira Code', 'SF Mono', 'Monaco', 'Menlo', monospace;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .calibrated-confidence-meter {
+    margin: 10px;
+    border-radius: 12px;
+  }
+  
+  .confidence-header {
+    padding: 12px 16px 8px;
+  }
+  
+  .confidence-header h3 {
+    font-size: 12px;
+  }
+  
+  .confidence-values {
+    font-size: 10px;
+  }
+  
+  .confidence-bar-container {
+    padding: 10px 16px;
+  }
+  
+  .confidence-value {
+    font-size: 9px;
+    right: 8px;
+  }
+  
+  .confidence-delta {
+    padding: 10px 16px;
+  }
+  
+  .delta-text {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calibrated-confidence-meter {
+    min-width: unset;
+    width: 100%;
+    margin: 8px 0;
+  }
+  
+  .confidence-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .confidence-bar-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .confidence-bar-container label {
+    margin-bottom: 6px;
+  }
+  
+  .confidence-bar-track {
+    height: 16px;
+  }
+  
+  .confidence-value {
+    position: static;
+    transform: none;
+    margin-top: 4px;
+    text-align: right;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .calibrated-confidence-meter {
+    border-width: 2px;
+    border-color: #8b5cf6;
+  }
+  
+  .confidence-bar-track {
+    border-width: 2px;
+  }
+  
+  .confidence-value {
+    text-shadow: 
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px 1px 0 #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .calibrated-confidence-meter,
+  .confidence-bar-fill,
+  .confidence-bar-track,
+  .confidence-value,
+  .delta-text {
+    transition: none;
+  }
+  
+  .confidence-bar-shimmer,
+  .delta-icon {
+    animation: none;
+  }
+  
+  .calibrated-confidence-meter:hover {
+    transform: none;
+  }
+}
+
+/* Dark theme optimizations */
+@media (prefers-color-scheme: dark) {
+  .calibrated-confidence-meter {
+    background: rgba(15, 20, 35, 0.98);
+    backdrop-filter: blur(16px);
+  }
+  
+  .confidence-bar-track {
+    background: rgba(31, 41, 55, 0.9);
+  }
+  
+  .confidence-header h3 {
+    color: #f8fafc;
+  }
+}
+
+/* Print styles */
+@media print {
+  .calibrated-confidence-meter {
+    background: white;
+    border: 2px solid #000;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+  
+  .confidence-bar-fill {
+    background: #666 !important;
+  }
+  
+  .confidence-bar-shimmer {
+    display: none;
+  }
+  
+  .confidence-header h3,
+  .confidence-value,
+  .delta-text {
+    color: #000 !important;
+  }
+}
+
+/* Focus styles for accessibility */
+.confidence-bar-track:focus,
+.confidence-bar-track:focus-visible {
+  outline: 2px solid #8b5cf6;
+  outline-offset: 2px;
+}
+
+/* Animation performance optimizations */
+.confidence-bar-fill,
+.confidence-bar-shimmer {
+  will-change: transform, width;
+  transform: translateZ(0);
+}
+
+/* Custom scrollbar for overflow content */
+.calibrated-confidence-meter::-webkit-scrollbar {
+  width: 6px;
+}
+
+.calibrated-confidence-meter::-webkit-scrollbar-track {
+  background: rgba(55, 65, 81, 0.3);
+  border-radius: 3px;
+}
+
+.calibrated-confidence-meter::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.6);
+  border-radius: 3px;
+}
+
+.calibrated-confidence-meter::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.8);
+}
+
+/* Utility classes for dynamic styling */
+.confidence-level-low {
+  --bar-color-start: #ef4444;
+  --bar-color-end: #dc2626;
+}
+
+.confidence-level-medium {
+  --bar-color-start: #f59e0b;
+  --bar-color-end: #d97706;
+}
+
+.confidence-level-high {
+  --bar-color-start: #10b981;
+  --bar-color-end: #059669;
+}
+
+/* Comparison layout for multiple meters */
+.confidence-meter-comparison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.95);
+  border-radius: 16px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  backdrop-filter: blur(12px);
+}
+
+@media (max-width: 768px) {
+  .confidence-meter-comparison {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+}
