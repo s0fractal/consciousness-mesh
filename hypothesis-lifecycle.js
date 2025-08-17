@@ -173,6 +173,7 @@ export class HypothesisLifecycle {
       supports: evidence.supports !== false, // Default to supporting
       confidence: evidence.confidence || 0.5,
       weight: evidence.weight || 1.0,
+      intervention: evidence.intervention || false, // Mark intervention events
       timestamp: Date.now(),
       data: evidence.data || {}
     };
@@ -180,10 +181,13 @@ export class HypothesisLifecycle {
     hypothesis.evidence.push(structuredEvidence);
     hypothesis.metadata.totalEvidence++;
     
-    if (structuredEvidence.supports) {
-      hypothesis.metadata.supportingEvidence++;
-    } else {
-      hypothesis.metadata.contradictingEvidence++;
+    // Only count non-intervention evidence in learning statistics
+    if (!structuredEvidence.intervention) {
+      if (structuredEvidence.supports) {
+        hypothesis.metadata.supportingEvidence++;
+      } else {
+        hypothesis.metadata.contradictingEvidence++;
+      }
     }
     
     // Update hypothesis confidence
@@ -211,11 +215,20 @@ export class HypothesisLifecycle {
     const hypothesis = this.hypotheses.get(hypothesisId);
     if (!hypothesis || hypothesis.evidence.length === 0) return;
     
-    // Calculate weighted confidence
+    // Filter out intervention events from automatic learning
+    const learningEvidence = hypothesis.evidence.filter(ev => !ev.intervention);
+    
+    if (learningEvidence.length === 0) {
+      // If all evidence is intervention, use a neutral confidence
+      hypothesis.confidence = 0.5;
+      return hypothesis.confidence;
+    }
+    
+    // Calculate weighted confidence using only non-intervention evidence
     let totalWeight = 0;
     let weightedSum = 0;
     
-    hypothesis.evidence.forEach(ev => {
+    learningEvidence.forEach(ev => {
       const weight = ev.weight * (ev.supports ? 1 : -1);
       weightedSum += weight * ev.confidence;
       totalWeight += ev.weight;
@@ -376,6 +389,53 @@ export class HypothesisLifecycle {
     if (this.eventHandlers[event]) {
       this.eventHandlers[event].forEach(handler => handler(data));
     }
+  }
+  
+  /**
+   * Get evidence statistics including intervention tracking
+   */
+  getEvidenceStatistics(hypothesisId) {
+    const hypothesis = this.hypotheses.get(hypothesisId);
+    if (!hypothesis) {
+      throw new Error(`Hypothesis ${hypothesisId} not found`);
+    }
+    
+    const stats = {
+      total: hypothesis.evidence.length,
+      learning: 0,
+      intervention: 0,
+      supporting: 0,
+      contradicting: 0,
+      interventionSupporting: 0,
+      interventionContradicting: 0
+    };
+    
+    hypothesis.evidence.forEach(ev => {
+      if (ev.intervention) {
+        stats.intervention++;
+        if (ev.supports) {
+          stats.interventionSupporting++;
+        } else {
+          stats.interventionContradicting++;
+        }
+      } else {
+        stats.learning++;
+        if (ev.supports) {
+          stats.supporting++;
+        } else {
+          stats.contradicting++;
+        }
+      }
+    });
+    
+    return stats;
+  }
+  
+  /**
+   * Get all hypotheses
+   */
+  getAllHypotheses() {
+    return Array.from(this.hypotheses.values());
   }
 }
 
