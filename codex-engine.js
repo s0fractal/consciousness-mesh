@@ -5,6 +5,7 @@
 
 import { integrateCalibration } from './confidence-calibration.js';
 import { integrateEvidenceWeighting } from './evidence-weighting.js';
+import { HypothesisLifecycle, createHypothesisInbox } from './hypothesis-lifecycle.js';
 
 export class CodexEngine {
   constructor(experimentsuite, chronoWeather, patternsOverlay) {
@@ -59,6 +60,10 @@ export class CodexEngine {
     
     // Integrate evidence weighting
     this.evidenceWeighting = integrateEvidenceWeighting(this);
+    
+    // Initialize hypothesis lifecycle
+    this.hypothesisLifecycle = new HypothesisLifecycle();
+    this.setupHypothesisIntegration();
   }
   
   /**
@@ -788,6 +793,79 @@ export class CodexEngine {
     if (this.codex.insights.length > 100) {
       this.codex.insights = this.codex.insights.slice(-100);
     }
+  }
+  
+  /**
+   * Setup hypothesis lifecycle integration
+   */
+  setupHypothesisIntegration() {
+    // Subscribe to hypothesis events
+    this.hypothesisLifecycle.on('onStatusChange', (data) => {
+      this.addInsight({
+        type: 'hypothesis-status',
+        title: `Hypothesis ${data.transition.to}: ${data.hypothesis.title}`,
+        details: data.transition,
+        timestamp: Date.now()
+      });
+    });
+    
+    this.hypothesisLifecycle.on('onEvidenceAdded', (data) => {
+      // Link evidence to current experiment if applicable
+      if (this.currentExperiment) {
+        data.evidence.experiment = this.currentExperiment;
+      }
+    });
+    
+    // Create inbox UI if in browser
+    if (typeof document !== 'undefined') {
+      setTimeout(() => {
+        createHypothesisInbox(this.hypothesisLifecycle, document.body);
+      }, 100);
+    }
+  }
+  
+  /**
+   * Propose new pattern as hypothesis
+   */
+  proposeNewPattern(id, pattern) {
+    // Check if pattern already exists
+    if (this.codex.patterns.has(id)) return;
+    
+    // Create hypothesis for the pattern
+    const hypothesis = this.hypothesisLifecycle.createHypothesis({
+      title: pattern.description,
+      description: `Investigating pattern: ${pattern.description}`,
+      relatedLaws: this.currentLawId ? [this.currentLawId] : [],
+      tags: ['pattern', 'auto-generated'],
+      priority: pattern.confidence > 0.5 ? 'high' : 'medium'
+    });
+    
+    // Add initial evidence if provided
+    if (pattern.evidence) {
+      this.hypothesisLifecycle.addEvidence(hypothesis.id, {
+        type: 'experimental',
+        source: 'pattern_detection',
+        description: 'Initial pattern detection',
+        supports: true,
+        confidence: pattern.confidence || 0.5,
+        data: pattern.evidence
+      });
+    }
+    
+    // Auto-transition to gathering if confidence is high
+    if (pattern.confidence > 0.3) {
+      this.hypothesisLifecycle.transitionStatus(
+        hypothesis.id, 
+        'gathering', 
+        'Auto-transition: Pattern detection confidence'
+      );
+    }
+    
+    // Store pattern reference
+    pattern.hypothesisId = hypothesis.id;
+    this.codex.patterns.set(id, pattern);
+    
+    return hypothesis;
   }
   
   /**
