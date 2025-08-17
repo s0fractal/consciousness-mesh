@@ -3,6 +3,8 @@
  * Automatically evolves with new discoveries and experiments
  */
 
+import { integrateCalibration } from './confidence-calibration.js';
+
 export class CodexEngine {
   constructor(experimentsuite, chronoWeather, patternsOverlay) {
     this.experiments = experimentsuite;
@@ -50,6 +52,9 @@ export class CodexEngine {
     
     // Start evolution loop
     this.startEvolutionLoop();
+    
+    // Integrate confidence calibration
+    this.calibration = integrateCalibration(this);
   }
   
   /**
@@ -183,14 +188,24 @@ export class CodexEngine {
     const expectedIntensities = speeds.map(s => Math.sqrt(parseFloat(s)));
     const correlation = this.calculateCorrelation(intensities, expectedIntensities);
     
-    // Update law confidence
+    // Set current law for calibration
+    this.currentLawId = 'rhythmic-resonance';
+    
+    // Update law confidence with calibration
     const law = this.codex.laws.get('rhythmic-resonance');
     law.evidence.push({
       timestamp: Date.now(),
       correlation: correlation,
-      data: { speeds, intensities }
+      data: { speeds, intensities },
+      predicted: expectedIntensities,
+      actual: intensities
     });
-    law.confidence = this.updateConfidence(law.confidence, correlation);
+    
+    // Use calibrated confidence update
+    law.confidence = this.updateConfidence(law.confidence, {
+      predicted: expectedIntensities[expectedIntensities.length - 1],
+      actual: intensities[intensities.length - 1]
+    });
     
     // Check for new sub-patterns
     if (correlation < 0.7) {
@@ -549,6 +564,11 @@ export class CodexEngine {
               ${Math.round(law.confidence * 100)}%
             </div>
             <div style="color: #666; font-size: 10px;">confidence</div>
+            ${law.calibration ? `
+              <div style="color: #3b82f6; font-size: 10px; margin-top: 2px;">
+                ±${(law.calibration.uncertainty * 100).toFixed(1)}%
+              </div>
+            ` : ''}
           </div>
         </div>
         
