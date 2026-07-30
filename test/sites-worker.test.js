@@ -28,6 +28,12 @@ test('the Sites worker serves the exact encounter build', async () => {
   const curatorialStatement = await worker.fetch(
     new Request('https://mesh.example/docs/CURATORIAL-STATEMENT.md')
   );
+  const afterimageMemory = await worker.fetch(
+    new Request('https://mesh.example/encounter/afterimage-memory.js')
+  );
+  const afterimageProtocol = await worker.fetch(
+    new Request('https://mesh.example/docs/AFTERIMAGE-PROTOCOL.md')
+  );
 
   assert.equal(page.status, 200);
   assert.match(html, /content="https:\/\/mesh\.example\/encounter\/og\.jpg"/);
@@ -38,6 +44,8 @@ test('the Sites worker serves the exact encounter build', async () => {
   assert.match(await protocolHistory.text(), /retired/);
   assert.match(await exhibitionScore.text(), /EXHIBITION_DURATION_MS = 300_000/);
   assert.match(await curatorialStatement.text(), /inspectable metaphor/);
+  assert.match(await afterimageMemory.text(), /AFTERIMAGE_LIMITS/);
+  assert.match(await afterimageProtocol.text(), /voluntary, device-local memory/);
   assert.equal(
     (
       await worker.fetch(new Request('https://mesh.example/', {

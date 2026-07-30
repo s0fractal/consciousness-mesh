@@ -78,6 +78,23 @@ Hidden-tab time is excluded; pause, restart, manual mode, and journal export
 remain available throughout. See the [operator guide](./EXHIBITION-GUIDE.md)
 and [accessibility audit](./ACCESSIBILITY-AUDIT.md).
 
+## Phase 6 — Afterimage
+
+- [x] explicit consent after a completed encounter;
+- [x] bounded device-local archive with no network path;
+- [x] canonical SHA-256 integrity check before reuse;
+- [x] attributed prior echo that cannot affect simulation state;
+- [x] inspect, export, and explicit erase controls;
+- [x] corrupt-storage and storage-denial tests;
+
+Cross-device sync, identity inference, and storage without explicit consent
+remain prohibited.
+
+Afterimage is presentation memory, not a model input. The archive never evicts
+an older entry to make room silently, and a failed integrity check blocks reuse
+without overwriting the stored bytes. See the
+[Afterimage protocol](./AFTERIMAGE-PROTOCOL.md).
+
 ## Non-goals
 
 - proving sentience;

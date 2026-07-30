@@ -13,6 +13,12 @@ conditions become weather.
 > “consciousness”, “love”, “dream”, and “quantum” name artistic or computational
 > models unless a document explicitly says otherwise.
 
+The private exhibition build also includes **Afterimage**, an opt-in local
+memory layer. After a complete five-movement encounter, a visitor may store one
+short reflection in the current browser profile. A later visit can see the
+newest verified reflection as an attributed echo; it never changes simulation
+state and never leaves the device through the artwork.
+
 ## Start here
 
 Requirements:
@@ -40,7 +46,7 @@ The private five-minute installation is available by adding
 
 ## The restored core
 
-The supported restoration boundary contains six parts:
+The supported restoration boundary contains seven parts:
 
 1. **ChronoFlux-IEL** — a graph simulation with intent, phase, coupling, and
    care-inspired fields.
@@ -56,6 +62,9 @@ The supported restoration boundary contains six parts:
 6. **Secure Session core** — a three-step consent handshake with stable
    Ed25519 identity, ephemeral X25519 agreement, and bounded AES-GCM frames. It
    is not an Internet transport adapter.
+7. **Afterimage** — a bounded, consent-based local archive of attributed
+   encounter reflections. It is presentation memory, not simulation input,
+   recognition, or cloud state.
 
 Read [the art specification](./docs/ART-SPEC.md) for the conceptual contract and
 [the restoration roadmap](./docs/RESTORATION.md) for the engineering boundary.
@@ -80,6 +89,8 @@ does not contain production-capable distributed infrastructure.
 - `consciousness-glyphs.js` and `intent-index.yaml` — declarative symbolic layer.
 - `canonical-encounter.js` — deterministic encounter and provenance engine.
 - `canonical-encounter.html` and `encounter/` — accessible browser surface.
+- `encounter/afterimage-memory.js` — browser-local afterimage integrity and
+  retention boundary.
 - `memory-ledger.js` — immutable observation and interpretation ledger.
 - `secure-session.js` — authenticated, encrypted protocol core.
 - `test/` — restoration baseline tests.
@@ -87,6 +98,8 @@ does not contain production-capable distributed infrastructure.
 - `docs/CURATORIAL-STATEMENT.md` — visitor-facing curatorial frame.
 - `docs/EXHIBITION-GUIDE.md` — five-minute score and operator contract.
 - `docs/ACCESSIBILITY-AUDIT.md` — implemented access paths and open limits.
+- `docs/AFTERIMAGE-PROTOCOL.md` — consent, privacy, integrity, and limit
+  contract for browser-local encounter echoes.
 - `docs/MEMORY-PROTOCOL.md` — executable memory and integrity contract.
 - `docs/SECURE-SESSION-PROTOCOL.md` — authenticated session wire contract.
 - `docs/SECURE-SESSION-V1.md` — retired static-key protocol history.

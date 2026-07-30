@@ -17,6 +17,10 @@ mode.
 - a text description of current movement and all four canvas metrics;
 - `aria-current="step"` on the current movement;
 - timer and progress elements with accessible names;
+- a labelled reflection field, native consent checkbox, and disabled-until-ready
+  remember control;
+- a local archive status region, semantic ordered list, timestamps, and native
+  export and erase buttons;
 - automatic pause when the page is hidden;
 - responsive layouts down to a declared 320 CSS-pixel minimum;
 - reduced-motion CSS that removes smooth scrolling and transitions without
@@ -51,7 +55,14 @@ paper `16.35:1`, coral on paper `7.63:1`, and muted text on raised paper
 visibility pause hooks, reduced-motion rule, descriptive canvas relationship,
 core colour-token contrast, and absence of positive `tabindex`.
 `test/exhibition-score.test.js` proves that pause excludes hidden time and that
-the score is finite.
+the score is finite. `test/afterimage-memory.test.js` proves that invalid local
+records are not presented as verified memory.
+
+Afterimage adds no timed interaction. Storage is available only after all five
+movements, but there is no deadline for writing, consenting, exporting, or
+erasing. Stored text is rendered with `textContent`, not interpreted as markup.
+The newest prior echo exposes its origin and authority in text rather than
+colour alone.
 
 Automated checks are evidence, not a substitute for people.
 

@@ -31,4 +31,10 @@ The encounter ends but does not resolve. Its final state remains beside the
 journal that produced it. The artwork asks the visitor to judge not whether the
 network became conscious, but whether its connections became more accountable.
 
+After a complete encounter, a visitor may leave a short **afterimage** in the
+current browser profile. A later visit can meet that sentence as an attributed
+local echo. Nothing is remembered automatically, and the echo never becomes a
+force inside the model. The distinction matters: persistence can shape an
+encounter without being mistaken for recognition or mind.
+
 Truth label: **artwork + deterministic simulation**.

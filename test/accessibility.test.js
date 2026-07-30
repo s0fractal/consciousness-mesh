@@ -11,6 +11,11 @@ test('the encounter exposes a semantic, pausable exhibition surface', async () =
   assert.match(html, /id="canvas-state" class="sr-only"/);
   assert.match(html, /id="exhibition-progress"[\s\S]*max="300000"/);
   assert.match(html, /id="toggle-exhibition"[\s\S]*aria-pressed="false"/);
+  assert.match(html, /<label for="afterimage-reflection">/);
+  assert.match(html, /id="afterimage-reflection"[\s\S]*maxlength="160"/);
+  assert.match(html, /id="afterimage-consent" type="checkbox"/);
+  assert.match(html, /id="afterimage-archive-status"[\s\S]*role="status"/);
+  assert.match(html, /id="afterimage-list" class="afterimage-list"/);
   assert.match(html, /id="live-status"[\s\S]*aria-live="polite"/);
   assert.doesNotMatch(html, /tabindex="[1-9]/);
 });
@@ -26,6 +31,8 @@ test('timed presentation remains interruptible and motion-respectful', async () 
   assert.match(source, /event\.key === 'Escape'/);
   assert.match(source, /pauseExhibition/);
   assert.match(source, /timingAffectsSimulation: false/);
+  assert.match(source, /movementCount: state\.journal\.length/);
+  assert.match(source, /afterimageRememberButton\.disabled/);
   assert.match(styles, /@media \(prefers-reduced-motion: reduce\)/);
   assert.doesNotMatch(source, /prefersReducedMotion\.matches \? 250/);
 });

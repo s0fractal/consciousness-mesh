@@ -115,6 +115,13 @@ an observed subject from the ID of the historical act that recorded it. Later
 facets may conflict, but each remains attributable and chained; ordering does
 not grant any facet semantic supremacy.
 
+The exhibition surface adds a narrower memory form called **Afterimage**.
+Afterimage stores a visitor-authored reflection only after a completed
+encounter and explicit local-storage consent. A later visit may present the
+newest verified record as an attributed echo, but the record is never fed into
+the simulation. Its contract is defined in
+[`AFTERIMAGE-PROTOCOL.md`](./AFTERIMAGE-PROTOCOL.md).
+
 ## 4. Canonical encounter
 
 The canonical minimal encounter has five movements:

@@ -8,6 +8,10 @@ import {
   EXHIBITION_SCORE_VERSION,
   ExhibitionScore
 } from './exhibition-score.js';
+import {
+  AFTERIMAGE_LIMITS,
+  AfterimageStore
+} from './afterimage-memory.js';
 
 const elements = {
   canvas: document.querySelector('#mesh-canvas'),
@@ -29,6 +33,19 @@ const elements = {
   exhibitionStatus: document.querySelector('#exhibition-status'),
   exhibitionButton: document.querySelector('#toggle-exhibition'),
   exitExhibitionButton: document.querySelector('#exit-exhibition'),
+  afterimageEcho: document.querySelector('#afterimage-echo'),
+  afterimageEchoText: document.querySelector('#afterimage-echo-text'),
+  afterimageEchoOrigin: document.querySelector('#afterimage-echo-origin'),
+  afterimageForm: document.querySelector('#afterimage-form'),
+  afterimageReflection: document.querySelector('#afterimage-reflection'),
+  afterimageConsent: document.querySelector('#afterimage-consent'),
+  afterimageRememberButton: document.querySelector('#remember-afterimage'),
+  afterimageFormStatus: document.querySelector('#afterimage-form-status'),
+  afterimageCount: document.querySelector('#afterimage-count'),
+  afterimageArchiveStatus: document.querySelector('#afterimage-archive-status'),
+  afterimageList: document.querySelector('#afterimage-list'),
+  afterimageExportButton: document.querySelector('#export-afterimages'),
+  afterimageEraseButton: document.querySelector('#erase-afterimages'),
   journal: document.querySelector('#provenance-journal'),
   journalEmpty: document.querySelector('#journal-empty'),
   liveStatus: document.querySelector('#live-status'),
@@ -46,6 +63,27 @@ let playTimer = null;
 let exhibitionTimer = null;
 let exhibitionActive = false;
 let exhibitionScore = new ExhibitionScore();
+let afterimageStore = null;
+let afterimageArchive = {
+  valid: true,
+  entries: [],
+  error: null,
+  loading: true
+};
+let arrivalAfterimage = null;
+let afterimageBusy = false;
+let afterimageFailure = null;
+
+try {
+  afterimageStore = new AfterimageStore({ storage: window.localStorage });
+} catch {
+  afterimageArchive = {
+    valid: false,
+    entries: [],
+    error: 'Local storage is unavailable.',
+    loading: false
+  };
+}
 
 const initialParameters = new URLSearchParams(window.location.search);
 const requestedExhibitionMode = initialParameters.get('mode') === 'exhibition';
@@ -117,6 +155,7 @@ function render() {
   renderMovementState(state);
   renderJournal(state.journal);
   renderExhibition();
+  renderAfterimageFormState(state);
   elements.seedStamp.textContent = state.seed;
 
   const gestureInputs = document.querySelectorAll('input[name="gesture"]');
@@ -391,6 +430,259 @@ function renderJournal(entries) {
   }
 }
 
+function renderAfterimageFormState(state = encounter.getState()) {
+  const reflection = elements.afterimageReflection.value.trim();
+  const reflectionValid = (
+    reflection.length >= 1
+    && reflection.length <= AFTERIMAGE_LIMITS.maxReflectionChars
+  );
+  const archiveFull = (
+    afterimageArchive.valid
+    && afterimageArchive.entries.length >= AFTERIMAGE_LIMITS.maxEntries
+  );
+  const ready = (
+    state.completed
+    && afterimageStore
+    && afterimageArchive.valid
+    && !afterimageArchive.loading
+    && !archiveFull
+    && reflectionValid
+    && elements.afterimageConsent.checked
+    && !afterimageBusy
+  );
+  elements.afterimageRememberButton.disabled = !ready;
+
+  if (afterimageBusy) {
+    elements.afterimageFormStatus.textContent = 'Verifying and storing locally…';
+  } else if (afterimageFailure) {
+    elements.afterimageFormStatus.textContent = afterimageFailure;
+  } else if (!afterimageStore) {
+    elements.afterimageFormStatus.textContent = (
+      'Local storage is unavailable. Nothing can be remembered here.'
+    );
+  } else if (afterimageArchive.loading) {
+    elements.afterimageFormStatus.textContent = (
+      'Reading and verifying the local archive…'
+    );
+  } else if (!afterimageArchive.valid) {
+    elements.afterimageFormStatus.textContent = (
+      'The existing archive failed verification. It will not be reused or overwritten.'
+    );
+  } else if (archiveFull) {
+    elements.afterimageFormStatus.textContent = (
+      'The archive is full. Export it, then erase it explicitly before adding more.'
+    );
+  } else if (!state.completed) {
+    elements.afterimageFormStatus.textContent = (
+      'Complete all five movements before leaving an afterimage.'
+    );
+  } else if (!reflectionValid) {
+    elements.afterimageFormStatus.textContent = (
+      `Write a reflection of 1-${AFTERIMAGE_LIMITS.maxReflectionChars} characters.`
+    );
+  } else if (!elements.afterimageConsent.checked) {
+    elements.afterimageFormStatus.textContent = (
+      'Confirm device-local storage to remember this encounter.'
+    );
+  } else {
+    elements.afterimageFormStatus.textContent = (
+      `Ready to remember seed ${state.seed}; no network request will be made.`
+    );
+  }
+}
+
+function formatAfterimageDate(timestamp) {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  }).format(new Date(timestamp));
+}
+
+function renderArrivalAfterimage() {
+  if (!arrivalAfterimage) {
+    elements.afterimageEcho.hidden = true;
+    return;
+  }
+  const { content } = arrivalAfterimage;
+  elements.afterimageEchoText.textContent = `“${content.reflection.text}”`;
+  elements.afterimageEchoOrigin.textContent = (
+    `${content.encounter.seed} · ${content.encounter.gesture} · ${
+      formatAfterimageDate(content.createdAt)
+    } · visitor-authored reflection`
+  );
+  elements.afterimageEcho.hidden = false;
+}
+
+function renderAfterimageArchive() {
+  const entries = afterimageArchive.entries;
+  elements.afterimageCount.value = (
+    `${entries.length} / ${AFTERIMAGE_LIMITS.maxEntries}`
+  );
+  elements.afterimageList.replaceChildren();
+
+  if (afterimageArchive.loading) {
+    elements.afterimageArchiveStatus.textContent = (
+      'Reading the local archive…'
+    );
+  } else if (!afterimageArchive.valid) {
+    elements.afterimageArchiveStatus.textContent = (
+      `${afterimageArchive.error} The archive is not being used.`
+    );
+  } else if (entries.length === 0) {
+    elements.afterimageArchiveStatus.textContent = (
+      'No afterimages are stored in this browser profile.'
+    );
+  } else {
+    elements.afterimageArchiveStatus.textContent = (
+      `${entries.length} integrity-verified local ${
+        entries.length === 1 ? 'afterimage' : 'afterimages'
+      }. Newest is shown first.`
+    );
+  }
+
+  for (const entry of [...entries].reverse()) {
+    const { content } = entry;
+    const item = document.createElement('li');
+
+    const identity = document.createElement('div');
+    identity.className = 'afterimage-identity';
+    const seed = document.createElement('strong');
+    seed.textContent = content.encounter.seed;
+    const time = document.createElement('time');
+    time.dateTime = content.createdAt;
+    time.textContent = formatAfterimageDate(content.createdAt);
+    identity.append(seed, time);
+
+    const reflection = document.createElement('blockquote');
+    reflection.textContent = `“${content.reflection.text}”`;
+
+    const metrics = document.createElement('dl');
+    metrics.className = 'afterimage-metrics';
+    for (const name of ['H', 'tau', 'L', 'K']) {
+      const wrapper = document.createElement('div');
+      const term = document.createElement('dt');
+      term.textContent = name;
+      const value = document.createElement('dd');
+      value.textContent = formatMetric(content.encounter.finalMetrics[name]);
+      wrapper.append(term, value);
+      metrics.append(wrapper);
+    }
+
+    const evidence = document.createElement('div');
+    evidence.className = 'afterimage-evidence';
+    const authority = document.createElement('p');
+    authority.textContent = (
+      `${content.encounter.gesture} · ${content.reflection.authority}`
+    );
+    const identifier = document.createElement('code');
+    identifier.textContent = `${entry.id.slice(0, 19)}…`;
+    identifier.title = entry.id;
+    evidence.append(authority, identifier);
+
+    item.append(identity, reflection, metrics, evidence);
+    elements.afterimageList.append(item);
+  }
+
+  elements.afterimageExportButton.disabled = (
+    !afterimageArchive.valid || entries.length === 0 || afterimageBusy
+  );
+  elements.afterimageEraseButton.disabled = (
+    !afterimageStore
+    || afterimageArchive.loading
+    || (afterimageArchive.valid && entries.length === 0)
+    || afterimageBusy
+  );
+  renderArrivalAfterimage();
+  renderAfterimageFormState();
+}
+
+async function loadAfterimages(captureArrival = false) {
+  if (!afterimageStore) {
+    afterimageArchive.loading = false;
+    renderAfterimageArchive();
+    return;
+  }
+  afterimageArchive = {
+    ...await afterimageStore.inspect(),
+    loading: false
+  };
+  if (captureArrival && afterimageArchive.valid) {
+    arrivalAfterimage = afterimageArchive.entries.at(-1) ?? null;
+  }
+  renderAfterimageArchive();
+}
+
+async function rememberAfterimage(event) {
+  event.preventDefault();
+  const state = encounter.getState();
+  renderAfterimageFormState(state);
+  if (elements.afterimageRememberButton.disabled) return;
+
+  afterimageBusy = true;
+  afterimageFailure = null;
+  renderAfterimageArchive();
+  try {
+    await afterimageStore.remember({
+      seed: state.seed,
+      gesture: encounter.gestureId,
+      movementCount: state.journal.length,
+      finalMetrics: Object.fromEntries(
+        ['H', 'tau', 'L', 'K'].map(name => [name, state.snapshot.metrics[name]])
+      ),
+      reflection: elements.afterimageReflection.value
+    });
+    elements.afterimageReflection.value = '';
+    elements.afterimageConsent.checked = false;
+    await loadAfterimages();
+    announce(
+      'Afterimage stored in this browser profile. No network request was made.'
+    );
+  } catch (error) {
+    afterimageFailure = (
+      `Afterimage was not stored: ${error.message}`
+    );
+    announce('Afterimage was not stored.');
+  } finally {
+    afterimageBusy = false;
+    renderAfterimageArchive();
+  }
+}
+
+async function exportAfterimages() {
+  try {
+    const data = await afterimageStore.export();
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'consciousness-mesh-afterimages.json';
+    anchor.click();
+    URL.revokeObjectURL(url);
+    announce('Verified local afterimage archive exported.');
+  } catch (error) {
+    announce(`Afterimage archive could not be exported: ${error.message}`);
+  }
+}
+
+async function eraseAfterimages() {
+  if (!afterimageStore) return;
+  const confirmed = window.confirm(
+    'Erase every Consciousness Mesh afterimage stored in this browser profile?'
+  );
+  if (!confirmed) {
+    announce('Local afterimages were kept.');
+    return;
+  }
+  try {
+    afterimageStore.clear();
+    arrivalAfterimage = null;
+    await loadAfterimages();
+    announce('All local afterimages were erased from this browser profile.');
+  } catch {
+    announce('Local afterimages could not be erased.');
+  }
+}
+
 function updateUrl() {
   const url = new URL(window.location.href);
   url.searchParams.set('seed', encounter.seed);
@@ -610,6 +902,17 @@ elements.copyLinkButton.addEventListener('click', copySeededLink);
 elements.exportButton.addEventListener('click', exportJournal);
 elements.exhibitionButton.addEventListener('click', toggleExhibition);
 elements.exitExhibitionButton.addEventListener('click', exitExhibition);
+elements.afterimageForm.addEventListener('submit', rememberAfterimage);
+elements.afterimageReflection.addEventListener('input', () => {
+  afterimageFailure = null;
+  renderAfterimageFormState();
+});
+elements.afterimageConsent.addEventListener('change', () => {
+  afterimageFailure = null;
+  renderAfterimageFormState();
+});
+elements.afterimageExportButton.addEventListener('click', exportAfterimages);
+elements.afterimageEraseButton.addEventListener('click', eraseAfterimages);
 elements.seedInput.addEventListener('change', restart);
 
 for (const input of document.querySelectorAll('input[name="gesture"]')) {
@@ -648,4 +951,5 @@ document.addEventListener('visibilitychange', () => {
 createMovementList();
 updateUrl();
 render();
+loadAfterimages(true);
 if (requestedExhibitionMode) beginExhibition();
