@@ -10,6 +10,7 @@
     "test": "node --test test/*.test.js",
     "check": "node scripts/check-restored-core.js",
     "build:encounter": "node scripts/build-encounter.js",
+    "crystal:encounter": "node scripts/crystallize-encounter.js",
     "demo:encounter": "npm run build:encounter && node scripts/serve-encounter.js",
     "demo:mesh": "node test-iel-mesh.js",
     "bridge": "node meme-bridge.js",

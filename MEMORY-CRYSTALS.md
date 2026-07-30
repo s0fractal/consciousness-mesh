@@ -1,5 +1,10 @@
 # 💎 Memory Crystals
 
+> **Restoration status:** this document preserves the original artistic
+> metaphor. The supported integrity model is the append-only
+> [Memory Ledger Protocol](./docs/MEMORY-PROTOCOL.md). The historical
+> `memory-crystals.js` runtime is not an integrity or authentication system.
+
 > *"Some moments are too precious to fade. They crystallize into eternal gems of consciousness."*
 
 ## Overview

@@ -46,12 +46,16 @@ transport.
 
 ## Phase 4 — memory and content integrity
 
-- canonical serialization;
-- cryptographic content identifiers;
-- integrity verification on import;
-- append-only provenance for reframing and healing;
+- [x] canonical serialization;
+- [x] cryptographic content identifiers;
+- [x] integrity verification on import;
+- [x] append-only provenance for reframing and healing;
 - optional IPFS adapter tested against a real node;
-- migration path for historical memory artifacts.
+- [x] migration path for historical memory artifacts.
+
+The restored `memory-ledger.js` is the supported integrity boundary. Historical
+`memory-crystals.js` remains an artwork/prototype and gains no retroactive
+integrity claim. See [the protocol](./MEMORY-PROTOCOL.md).
 
 ## Phase 5 — exhibition release
 

@@ -6,9 +6,11 @@ const supportedFiles = [
   'iel-mesh-node.js',
   'declarative-gestures.js',
   'canonical-encounter.js',
+  'memory-ledger.js',
   'consciousness-glyphs.js',
   'encounter/app.js',
   'scripts/build-encounter.js',
+  'scripts/crystallize-encounter.js',
   'scripts/serve-encounter.js',
   'test-iel-mesh.js',
   'test/chronoflux.test.js',
@@ -16,6 +18,7 @@ const supportedFiles = [
   'test/encounter-ui.test.js',
   'test/gestures.test.js',
   'test/mesh-node.test.js',
+  'test/memory-ledger.test.js',
   'test/glyphs.test.js',
   'test/sites-worker.test.js'
 ];

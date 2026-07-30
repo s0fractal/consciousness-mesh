@@ -35,7 +35,7 @@ For the numerical mesh demonstration without the browser surface, run
 
 ## The restored core
 
-The supported restoration boundary contains four parts:
+The supported restoration boundary contains five parts:
 
 1. **ChronoFlux-IEL** — a graph simulation with intent, phase, coupling, and
    care-inspired fields.
@@ -46,6 +46,8 @@ The supported restoration boundary contains four parts:
 4. **Canonical encounter** — a seeded five-movement browser artwork with an
    inspectable provenance journal and exact replay for the same seed and
    gesture.
+5. **Memory Ledger** — canonical, content-addressed observations with
+   append-only attributed interpretations and tamper-detecting import.
 
 Read [the art specification](./docs/ART-SPEC.md) for the conceptual contract and
 [the restoration roadmap](./docs/RESTORATION.md) for the engineering boundary.
@@ -70,8 +72,10 @@ does not contain production-capable distributed infrastructure.
 - `consciousness-glyphs.js` and `intent-index.yaml` — declarative symbolic layer.
 - `canonical-encounter.js` — deterministic encounter and provenance engine.
 - `canonical-encounter.html` and `encounter/` — accessible browser surface.
+- `memory-ledger.js` — immutable observation and interpretation ledger.
 - `test/` — restoration baseline tests.
 - `docs/ART-SPEC.md` — artistic and semantic specification.
+- `docs/MEMORY-PROTOCOL.md` — executable memory and integrity contract.
 - `docs/RESTORATION.md` — technical roadmap and acceptance gates.
 - `docs/LEGACY-VISION.md` — the original expansive vision, preserved as an
   artistic source rather than current implementation documentation.
