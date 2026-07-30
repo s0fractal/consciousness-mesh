@@ -13,20 +13,23 @@ import {
 } from 'node:crypto';
 import { canonicalStringify } from './memory-ledger.js';
 
-export const SECURE_IDENTITY_VERSION = 'secure-identity/v1';
-export const SESSION_OFFER_VERSION = 'session-offer/v1';
-export const SECURE_FRAME_VERSION = 'secure-frame/v1';
+export const SECURE_IDENTITY_VERSION = 'secure-identity/v2';
+export const SESSION_OFFER_VERSION = 'session-offer/v2';
+export const SESSION_ACCEPTANCE_VERSION = 'session-acceptance/v2';
+export const SECURE_FRAME_VERSION = 'secure-frame/v2';
 export const FORWARDED_MESSAGE_VERSION = 'forwarded-message/v1';
 
 export const SECURE_SESSION_LIMITS = Object.freeze({
   maxPayloadBytes: 16_384,
   maxFrameBytes: 32_768,
+  maxHandshakeBytes: 8_192,
   maxTtl: 8,
   maxOfferAgeMs: 300_000,
   maxFutureSkewMs: 30_000,
   maxFrameAgeMs: 300_000,
   rateCapacity: 32,
   ratePerSecond: 8,
+  maxPendingOffers: 64,
   maxSessionIds: 4096
 });
 
@@ -61,10 +64,20 @@ function clone(value) {
   return JSON.parse(canonicalStringify(value));
 }
 
-function cloneProtocolValue(value, code, message) {
+function cloneProtocolValue(
+  value,
+  code,
+  message,
+  maxBytes = SECURE_SESSION_LIMITS.maxHandshakeBytes
+) {
   try {
-    return clone(value);
-  } catch {
+    const serialized = canonicalStringify(value);
+    if (Buffer.byteLength(serialized) > maxBytes) {
+      fail('HANDSHAKE_TOO_LARGE', 'protocol value exceeds handshake byte limit');
+    }
+    return JSON.parse(serialized);
+  } catch (error) {
+    if (error instanceof SecureSessionError) throw error;
     fail(code, message);
   }
 }
@@ -192,8 +205,7 @@ function identityStatement(identity) {
     version: identity.version,
     peerId: identity.peerId,
     label: identity.label,
-    signingKey: identity.signingKey,
-    exchangeKey: identity.exchangeKey
+    signingKey: identity.signingKey
   };
 }
 
@@ -204,7 +216,6 @@ function validatePublicIdentity(identity) {
     'identity must be canonical JSON data'
   );
   if (!exactKeys(identity, [
-    'exchangeKey',
     'label',
     'peerId',
     'proof',
@@ -224,11 +235,6 @@ function validatePublicIdentity(identity) {
     'ed25519',
     'identity.signingKey'
   );
-  const exchangeKey = importPublicKey(
-    identity.exchangeKey,
-    'x25519',
-    'identity.exchangeKey'
-  );
   if (identity.peerId !== sha256Id(publicDer(signingKey))) {
     fail('INVALID_IDENTITY', 'peer ID does not match signing key');
   }
@@ -241,7 +247,7 @@ function validatePublicIdentity(identity) {
   )) {
     fail('INVALID_IDENTITY', 'identity proof did not verify');
   }
-  return { signingKey, exchangeKey, identity: clone(identity) };
+  return { signingKey, identity: clone(identity) };
 }
 
 function offerStatement(offer) {
@@ -251,7 +257,20 @@ function offerStatement(offer) {
     from: offer.from,
     to: offer.to,
     createdAt: offer.createdAt,
-    maxTtl: offer.maxTtl
+    maxTtl: offer.maxTtl,
+    ephemeralKey: offer.ephemeralKey
+  };
+}
+
+function acceptanceStatement(acceptance) {
+  return {
+    version: acceptance.version,
+    offerId: acceptance.offerId,
+    sessionId: acceptance.sessionId,
+    from: acceptance.from,
+    to: acceptance.to,
+    createdAt: acceptance.createdAt,
+    ephemeralKey: acceptance.ephemeralKey
   };
 }
 
@@ -285,7 +304,7 @@ function sequenceNonce(key, sequence) {
   const nonce = Buffer.alloc(12);
   createHash('sha256')
     .update(key)
-    .update('consciousness-mesh/nonce-prefix/v1')
+    .update('consciousness-mesh/nonce-prefix/v2')
     .digest()
     .copy(nonce, 0, 0, 4);
   nonce.writeBigUInt64BE(BigInt(sequence), 4);
@@ -316,11 +335,191 @@ class TokenBucket {
   }
 }
 
+function validateFreshTimestamp(value, name, clock, limits) {
+  canonicalTimestamp(value, name);
+  const age = readClock(clock) - Date.parse(value);
+  if (age > limits.maxOfferAgeMs || age < -limits.maxFutureSkewMs) {
+    fail('EXPIRED_HANDSHAKE', `${name} is outside the accepted time window`);
+  }
+}
+
+function validateOffer(offer, issuer, expectedTo, clock, limits) {
+  offer = cloneProtocolValue(
+    offer,
+    'INVALID_OFFER',
+    'session offer must be canonical JSON data',
+    limits.maxHandshakeBytes
+  );
+  if (!exactKeys(offer, [
+    'createdAt',
+    'ephemeralKey',
+    'from',
+    'maxTtl',
+    'sessionId',
+    'signature',
+    'to',
+    'version'
+  ])) {
+    fail('INVALID_OFFER', 'session offer has unexpected fields');
+  }
+  if (offer.version !== SESSION_OFFER_VERSION) {
+    fail('DOWNGRADE_REFUSED', 'only session-offer/v2 is accepted');
+  }
+  if (offer.from !== issuer.identity.peerId || offer.to !== expectedTo) {
+    fail('INVALID_OFFER', 'session offer is not addressed to this pair');
+  }
+  if (
+    !Number.isSafeInteger(offer.maxTtl)
+    || offer.maxTtl < 1
+    || offer.maxTtl > limits.maxTtl
+  ) {
+    fail('INVALID_TTL', 'session offer TTL exceeds local policy');
+  }
+  const sessionId = decodeBase64Url(
+    offer.sessionId,
+    'offer.sessionId',
+    24
+  );
+  validateFreshTimestamp(
+    offer.createdAt,
+    'offer.createdAt',
+    clock,
+    limits
+  );
+  const ephemeralKey = importPublicKey(
+    offer.ephemeralKey,
+    'x25519',
+    'offer.ephemeralKey'
+  );
+  if (!verify(
+    null,
+    Buffer.from(canonicalStringify(offerStatement(offer))),
+    issuer.signingKey,
+    decodeBase64Url(offer.signature, 'offer.signature', 64)
+  )) {
+    fail('INVALID_OFFER', 'session offer signature did not verify');
+  }
+  return {
+    ephemeralKey,
+    offer,
+    offerId: sha256Id(Buffer.from(canonicalStringify(offer))),
+    sessionId
+  };
+}
+
+function validateAcceptance(
+  acceptance,
+  issuer,
+  expectedTo,
+  validatedOffer,
+  clock,
+  limits
+) {
+  acceptance = cloneProtocolValue(
+    acceptance,
+    'INVALID_ACCEPTANCE',
+    'session acceptance must be canonical JSON data',
+    limits.maxHandshakeBytes
+  );
+  if (!exactKeys(acceptance, [
+    'createdAt',
+    'ephemeralKey',
+    'from',
+    'offerId',
+    'sessionId',
+    'signature',
+    'to',
+    'version'
+  ])) {
+    fail('INVALID_ACCEPTANCE', 'session acceptance has unexpected fields');
+  }
+  if (acceptance.version !== SESSION_ACCEPTANCE_VERSION) {
+    fail('DOWNGRADE_REFUSED', 'only session-acceptance/v2 is accepted');
+  }
+  if (
+    acceptance.from !== issuer.identity.peerId
+    || acceptance.to !== expectedTo
+    || acceptance.sessionId !== validatedOffer.offer.sessionId
+    || acceptance.offerId !== validatedOffer.offerId
+  ) {
+    fail('INVALID_ACCEPTANCE', 'acceptance is not bound to this offer and pair');
+  }
+  validateFreshTimestamp(
+    acceptance.createdAt,
+    'acceptance.createdAt',
+    clock,
+    limits
+  );
+  if (
+    Date.parse(acceptance.createdAt) + limits.maxFutureSkewMs
+    < Date.parse(validatedOffer.offer.createdAt)
+  ) {
+    fail('INVALID_ACCEPTANCE', 'acceptance predates its offer');
+  }
+  const ephemeralKey = importPublicKey(
+    acceptance.ephemeralKey,
+    'x25519',
+    'acceptance.ephemeralKey'
+  );
+  if (!verify(
+    null,
+    Buffer.from(canonicalStringify(acceptanceStatement(acceptance))),
+    issuer.signingKey,
+    decodeBase64Url(acceptance.signature, 'acceptance.signature', 64)
+  )) {
+    fail(
+      'INVALID_ACCEPTANCE',
+      'session acceptance signature did not verify'
+    );
+  }
+  return { acceptance, ephemeralKey };
+}
+
+function deriveSessionKeys(
+  localEphemeralPrivate,
+  peerEphemeralPublic,
+  sessionId,
+  offerId,
+  localPeerId,
+  peerPeerId
+) {
+  let sharedSecret;
+  try {
+    sharedSecret = diffieHellman({
+      privateKey: localEphemeralPrivate,
+      publicKey: peerEphemeralPublic
+    });
+  } catch {
+    fail('INVALID_KEY_AGREEMENT', 'ephemeral key agreement failed');
+  }
+  const ordered = [localPeerId, peerPeerId].sort();
+  const keyMaterial = Buffer.from(hkdfSync(
+    'sha256',
+    sharedSecret,
+    sessionId,
+    Buffer.from(
+      `consciousness-mesh/secure-session/v2:${offerId}:${ordered.join(':')}`
+    ),
+    64
+  ));
+  sharedSecret.fill(0);
+  const localIsFirst = localPeerId === ordered[0];
+  const sendKey = Buffer.from(
+    keyMaterial.subarray(localIsFirst ? 0 : 32, localIsFirst ? 32 : 64)
+  );
+  const receiveKey = Buffer.from(
+    keyMaterial.subarray(localIsFirst ? 32 : 0, localIsFirst ? 64 : 32)
+  );
+  keyMaterial.fill(0);
+  return { receiveKey, sendKey };
+}
+
 export class SecureIdentity {
+  #active = true;
   #clock;
-  #exchangePrivate;
-  #openedSessions = new Set();
+  #pendingOffers = new Map();
   #publicIdentity;
+  #seenSessions = new Set();
   #signingPrivate;
 
   constructor(label, options = {}) {
@@ -330,18 +529,14 @@ export class SecureIdentity {
     }
     const normalizedLabel = normalizeText(label, 'label', 128);
     const signing = generateKeyPairSync('ed25519');
-    const exchange = generateKeyPairSync('x25519');
     this.#signingPrivate = signing.privateKey;
-    this.#exchangePrivate = exchange.privateKey;
 
     const signingKey = base64Url(publicDer(signing.publicKey));
-    const exchangeKey = base64Url(publicDer(exchange.publicKey));
     const statement = {
       version: SECURE_IDENTITY_VERSION,
       peerId: sha256Id(publicDer(signing.publicKey)),
       label: normalizedLabel,
-      signingKey,
-      exchangeKey
+      signingKey
     };
     this.#publicIdentity = Object.freeze({
       ...statement,
@@ -361,31 +556,108 @@ export class SecureIdentity {
     return clone(this.#publicIdentity);
   }
 
-  createSessionOffer(peerIdentity, options = {}) {
-    const peer = validatePublicIdentity(peerIdentity).identity;
-    if (peer.peerId === this.peerId) {
+  #assertActive() {
+    if (!this.#active) fail('IDENTITY_CLOSED', 'secure identity is disposed');
+  }
+
+  #assertPeer(peer) {
+    if (peer.identity.peerId === this.peerId) {
       fail('SELF_SESSION', 'cannot create a session with the same identity');
     }
-    const maxTtl = options.maxTtl ?? SECURE_SESSION_LIMITS.maxTtl;
+  }
+
+  #assertSessionCapacity(limits) {
+    if (this.#seenSessions.size >= limits.maxSessionIds) {
+      fail('SESSION_LIMIT', 'identity must rotate before opening more sessions');
+    }
+  }
+
+  #prunePending(limits) {
+    const now = readClock(this.#clock);
+    for (const [sessionId, pending] of this.#pendingOffers) {
+      if (now - Date.parse(pending.offer.createdAt) > limits.maxOfferAgeMs) {
+        this.#pendingOffers.delete(sessionId);
+      }
+    }
+  }
+
+  #createSession(
+    peer,
+    validatedOffer,
+    localEphemeralPrivate,
+    peerEphemeralPublic,
+    limits
+  ) {
+    const keys = deriveSessionKeys(
+      localEphemeralPrivate,
+      peerEphemeralPublic,
+      validatedOffer.sessionId,
+      validatedOffer.offerId,
+      this.peerId,
+      peer.identity.peerId
+    );
+    let session;
+    try {
+      session = new SecureSession(SESSION_FACTORY, {
+        clock: this.#clock,
+        limits,
+        sessionId: validatedOffer.offer.sessionId,
+        maxTtl: validatedOffer.offer.maxTtl,
+        localIdentity: this.#publicIdentity,
+        peerIdentity: peer.identity,
+        peerSigningKey: peer.signingKey,
+        signingPrivate: this.#signingPrivate,
+        sendKey: keys.sendKey,
+        receiveKey: keys.receiveKey
+      });
+    } catch (error) {
+      keys.sendKey.fill(0);
+      keys.receiveKey.fill(0);
+      throw error;
+    }
+    this.#seenSessions.add(validatedOffer.offer.sessionId);
+    return session;
+  }
+
+  createSessionOffer(peerIdentity, options = {}) {
+    this.#assertActive();
+    const peer = validatePublicIdentity(peerIdentity);
+    this.#assertPeer(peer);
+    const limits = normalizeLimits(options.limits);
+    this.#prunePending(limits);
+    this.#assertSessionCapacity(limits);
+    if (this.#pendingOffers.size >= limits.maxPendingOffers) {
+      fail('PENDING_LIMIT', 'too many uncompleted session offers');
+    }
+    const maxTtl = options.maxTtl ?? limits.maxTtl;
     if (
       !Number.isSafeInteger(maxTtl)
       || maxTtl < 1
-      || maxTtl > SECURE_SESSION_LIMITS.maxTtl
+      || maxTtl > limits.maxTtl
     ) {
       fail('INVALID_TTL', 'offer maxTtl is outside protocol bounds');
     }
+    const ephemeral = generateKeyPairSync('x25519');
+    let sessionId;
+    do {
+      sessionId = base64Url(randomBytes(24));
+    } while (
+      this.#pendingOffers.has(sessionId)
+      || this.#seenSessions.has(sessionId)
+    );
     const statement = {
       version: SESSION_OFFER_VERSION,
-      sessionId: base64Url(randomBytes(24)),
+      sessionId,
       from: this.peerId,
-      to: peer.peerId,
+      to: peer.identity.peerId,
       createdAt: timestampFrom(
         options.createdAt ?? readClock(this.#clock),
         'offer.createdAt'
       ),
-      maxTtl
+      maxTtl,
+      ephemeralKey: base64Url(publicDer(ephemeral.publicKey))
     };
-    return {
+    const offer = {
       ...statement,
       signature: base64Url(sign(
         null,
@@ -393,111 +665,134 @@ export class SecureIdentity {
         this.#signingPrivate
       ))
     };
+    this.#pendingOffers.set(sessionId, {
+      ephemeralPrivate: ephemeral.privateKey,
+      offer: clone(offer),
+      peerId: peer.identity.peerId
+    });
+    return clone(offer);
   }
 
-  openSession(peerIdentity, offer, options = {}) {
+  cancelSessionOffer(sessionId) {
+    this.#assertActive();
+    if (typeof sessionId !== 'string') {
+      fail('INVALID_SESSION_ID', 'session ID must be text');
+    }
+    return this.#pendingOffers.delete(sessionId);
+  }
+
+  acceptSession(peerIdentity, offer, options = {}) {
+    this.#assertActive();
     const limits = normalizeLimits(options.limits);
     const local = validatePublicIdentity(this.#publicIdentity);
     const peer = validatePublicIdentity(peerIdentity);
-    offer = cloneProtocolValue(
+    this.#assertPeer(peer);
+    this.#assertSessionCapacity(limits);
+    const validatedOffer = validateOffer(
       offer,
-      'INVALID_OFFER',
-      'session offer must be canonical JSON data'
+      peer,
+      local.identity.peerId,
+      this.#clock,
+      limits
     );
-    if (!exactKeys(offer, [
-      'createdAt',
-      'from',
-      'maxTtl',
-      'sessionId',
-      'signature',
-      'to',
-      'version'
-    ])) {
-      fail('INVALID_OFFER', 'session offer has unexpected fields');
+    if (this.#seenSessions.has(validatedOffer.offer.sessionId)) {
+      fail('SESSION_REUSE', 'session offer has already been accepted');
     }
-    if (offer.version !== SESSION_OFFER_VERSION) {
-      fail('INVALID_OFFER', 'unsupported session offer version');
-    }
+    const ephemeral = generateKeyPairSync('x25519');
+    const acceptedAt = timestampFrom(
+      options.acceptedAt ?? readClock(this.#clock),
+      'acceptance.createdAt'
+    );
+    validateFreshTimestamp(
+      acceptedAt,
+      'acceptance.createdAt',
+      this.#clock,
+      limits
+    );
     if (
-      !(
-        offer.from === local.identity.peerId
-        && offer.to === peer.identity.peerId
-      )
-      && !(
-        offer.from === peer.identity.peerId
-        && offer.to === local.identity.peerId
-      )
+      Date.parse(acceptedAt) + limits.maxFutureSkewMs
+      < Date.parse(validatedOffer.offer.createdAt)
     ) {
-      fail('INVALID_OFFER', 'session offer is not addressed to this pair');
+      fail('INVALID_ACCEPTANCE', 'acceptance predates its offer');
     }
+    const statement = {
+      version: SESSION_ACCEPTANCE_VERSION,
+      offerId: validatedOffer.offerId,
+      sessionId: validatedOffer.offer.sessionId,
+      from: local.identity.peerId,
+      to: peer.identity.peerId,
+      createdAt: acceptedAt,
+      ephemeralKey: base64Url(publicDer(ephemeral.publicKey))
+    };
+    const acceptance = {
+      ...statement,
+      signature: base64Url(sign(
+        null,
+        Buffer.from(canonicalStringify(statement)),
+        this.#signingPrivate
+      ))
+    };
+    const session = this.#createSession(
+      peer,
+      validatedOffer,
+      ephemeral.privateKey,
+      validatedOffer.ephemeralKey,
+      limits
+    );
+    return Object.freeze({ acceptance: clone(acceptance), session });
+  }
+
+  completeSession(peerIdentity, offer, acceptance, options = {}) {
+    this.#assertActive();
+    const limits = normalizeLimits(options.limits);
+    this.#prunePending(limits);
+    this.#assertSessionCapacity(limits);
+    const local = validatePublicIdentity(this.#publicIdentity);
+    const peer = validatePublicIdentity(peerIdentity);
+    this.#assertPeer(peer);
+    const validatedOffer = validateOffer(
+      offer,
+      local,
+      peer.identity.peerId,
+      this.#clock,
+      limits
+    );
+    if (this.#seenSessions.has(validatedOffer.offer.sessionId)) {
+      fail('SESSION_REUSE', 'session offer has already been completed');
+    }
+    const pending = this.#pendingOffers.get(validatedOffer.offer.sessionId);
     if (
-      !Number.isSafeInteger(offer.maxTtl)
-      || offer.maxTtl < 1
-      || offer.maxTtl > limits.maxTtl
+      !pending
+      || pending.peerId !== peer.identity.peerId
+      || canonicalStringify(pending.offer)
+        !== canonicalStringify(validatedOffer.offer)
     ) {
-      fail('INVALID_TTL', 'session offer TTL exceeds local policy');
+      fail('UNKNOWN_OFFER', 'no matching local ephemeral offer state exists');
     }
-    const sessionId = decodeBase64Url(
-      offer.sessionId,
-      'offer.sessionId',
-      24
+    const validatedAcceptance = validateAcceptance(
+      acceptance,
+      peer,
+      local.identity.peerId,
+      validatedOffer,
+      this.#clock,
+      limits
     );
-    canonicalTimestamp(offer.createdAt, 'offer.createdAt');
-    const age = readClock(this.#clock) - Date.parse(offer.createdAt);
-    if (age > limits.maxOfferAgeMs || age < -limits.maxFutureSkewMs) {
-      fail('EXPIRED_OFFER', 'session offer is outside the accepted time window');
-    }
-    const issuer = offer.from === local.identity.peerId ? local : peer;
-    if (!verify(
-      null,
-      Buffer.from(canonicalStringify(offerStatement(offer))),
-      issuer.signingKey,
-      decodeBase64Url(offer.signature, 'offer.signature', 64)
-    )) {
-      fail('INVALID_OFFER', 'session offer signature did not verify');
-    }
-    if (this.#openedSessions.has(offer.sessionId)) {
-      fail('SESSION_REUSE', 'session offer has already been opened');
-    }
-    if (this.#openedSessions.size >= limits.maxSessionIds) {
-      fail('SESSION_LIMIT', 'identity must rotate before opening more sessions');
-    }
+    const session = this.#createSession(
+      peer,
+      validatedOffer,
+      pending.ephemeralPrivate,
+      validatedAcceptance.ephemeralKey,
+      limits
+    );
+    this.#pendingOffers.delete(validatedOffer.offer.sessionId);
+    return session;
+  }
 
-    const sharedSecret = diffieHellman({
-      privateKey: this.#exchangePrivate,
-      publicKey: peer.exchangeKey
-    });
-    const ordered = [local.identity.peerId, peer.identity.peerId].sort();
-    const keyMaterial = Buffer.from(hkdfSync(
-      'sha256',
-      sharedSecret,
-      sessionId,
-      Buffer.from(`consciousness-mesh/secure-session/v1:${ordered.join(':')}`),
-      64
-    ));
-    sharedSecret.fill(0);
-    const localIsFirst = local.identity.peerId === ordered[0];
-    const sendKey = Buffer.from(
-      keyMaterial.subarray(localIsFirst ? 0 : 32, localIsFirst ? 32 : 64)
-    );
-    const receiveKey = Buffer.from(
-      keyMaterial.subarray(localIsFirst ? 32 : 0, localIsFirst ? 64 : 32)
-    );
-    keyMaterial.fill(0);
-    this.#openedSessions.add(offer.sessionId);
-
-    return new SecureSession(SESSION_FACTORY, {
-      clock: this.#clock,
-      limits,
-      sessionId: offer.sessionId,
-      maxTtl: offer.maxTtl,
-      localIdentity: local.identity,
-      peerIdentity: peer.identity,
-      peerSigningKey: peer.signingKey,
-      signingPrivate: this.#signingPrivate,
-      sendKey,
-      receiveKey
-    });
+  dispose() {
+    if (!this.#active) return;
+    this.#pendingOffers.clear();
+    this.#signingPrivate = null;
+    this.#active = false;
   }
 }
 
@@ -770,6 +1065,10 @@ export class SecureSession {
     if (!this.#active) return;
     this.#sendKey.fill(0);
     this.#receiveKey.fill(0);
+    this.#sendKey = null;
+    this.#receiveKey = null;
+    this.#signingPrivate = null;
+    this.#peerSigningKey = null;
     this.#active = false;
   }
 }

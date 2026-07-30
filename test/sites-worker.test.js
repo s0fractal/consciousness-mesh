@@ -16,12 +16,20 @@ test('the Sites worker serves the exact encounter build', async () => {
   const image = await worker.fetch(
     new Request('https://mesh.example/encounter/og.jpg')
   );
+  const protocol = await worker.fetch(
+    new Request('https://mesh.example/docs/SECURE-SESSION-PROTOCOL.md')
+  );
+  const protocolHistory = await worker.fetch(
+    new Request('https://mesh.example/docs/SECURE-SESSION-V1.md')
+  );
 
   assert.equal(page.status, 200);
   assert.match(html, /content="https:\/\/mesh\.example\/encounter\/og\.jpg"/);
   assert.equal(image.status, 200);
   assert.equal(image.headers.get('content-type'), 'image/jpeg');
   assert.ok((await image.arrayBuffer()).byteLength > 100_000);
+  assert.match(await protocol.text(), /version 2 reference protocol/);
+  assert.match(await protocolHistory.text(), /retired/);
   assert.equal(
     (
       await worker.fetch(new Request('https://mesh.example/', {

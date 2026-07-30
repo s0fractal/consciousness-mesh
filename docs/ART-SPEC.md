@@ -168,9 +168,11 @@ The desired network is not “unstoppable”. It is interruptible, accountable, 
 capable of refusing unsafe contact.
 
 The executable Secure Session reference treats connection as a deliberate
-offer addressed to one peer, followed by explicit acceptance on both sides.
-Encryption protects the exchanged bytes; it does not make their interpretation
-true or grant the peer authority.
+offer addressed to one peer, a signed acceptance, and explicit completion by
+the initiator. Each encounter receives new ephemeral key material: identity
+recognizes the participants without making a past encounter decryptable by a
+later identity-key compromise. Encryption protects the exchanged bytes; it
+does not make their interpretation true or grant the peer authority.
 
 ## 7. Scientific and technical honesty
 
