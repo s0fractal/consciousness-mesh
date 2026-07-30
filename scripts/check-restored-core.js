@@ -7,10 +7,12 @@ const supportedFiles = [
   'declarative-gestures.js',
   'canonical-encounter.js',
   'memory-ledger.js',
+  'secure-session.js',
   'consciousness-glyphs.js',
   'encounter/app.js',
   'scripts/build-encounter.js',
   'scripts/crystallize-encounter.js',
+  'scripts/secure-session-demo.js',
   'scripts/serve-encounter.js',
   'test-iel-mesh.js',
   'test/chronoflux.test.js',
@@ -19,6 +21,7 @@ const supportedFiles = [
   'test/gestures.test.js',
   'test/mesh-node.test.js',
   'test/memory-ledger.test.js',
+  'test/secure-session.test.js',
   'test/glyphs.test.js',
   'test/sites-worker.test.js'
 ];

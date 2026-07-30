@@ -35,7 +35,7 @@ For the numerical mesh demonstration without the browser surface, run
 
 ## The restored core
 
-The supported restoration boundary contains five parts:
+The supported restoration boundary contains six parts:
 
 1. **ChronoFlux-IEL** — a graph simulation with intent, phase, coupling, and
    care-inspired fields.
@@ -48,6 +48,8 @@ The supported restoration boundary contains five parts:
    gesture.
 5. **Memory Ledger** — canonical, content-addressed observations with
    append-only attributed interpretations and tamper-detecting import.
+6. **Secure Session core** — deliberately accepted peer identities and bounded
+   Ed25519/X25519/AES-GCM frames. It is not an Internet transport adapter.
 
 Read [the art specification](./docs/ART-SPEC.md) for the conceptual contract and
 [the restoration roadmap](./docs/RESTORATION.md) for the engineering boundary.
@@ -73,9 +75,12 @@ does not contain production-capable distributed infrastructure.
 - `canonical-encounter.js` — deterministic encounter and provenance engine.
 - `canonical-encounter.html` and `encounter/` — accessible browser surface.
 - `memory-ledger.js` — immutable observation and interpretation ledger.
+- `secure-session.js` — authenticated, encrypted protocol core.
 - `test/` — restoration baseline tests.
 - `docs/ART-SPEC.md` — artistic and semantic specification.
 - `docs/MEMORY-PROTOCOL.md` — executable memory and integrity contract.
+- `docs/SECURE-SESSION-PROTOCOL.md` — authenticated session wire contract.
+- `docs/TRANSPORT-THREAT-MODEL.md` — security guarantees and non-guarantees.
 - `docs/RESTORATION.md` — technical roadmap and acceptance gates.
 - `docs/LEGACY-VISION.md` — the original expansive vision, preserved as an
   artistic source rather than current implementation documentation.
@@ -83,6 +88,8 @@ does not contain production-capable distributed infrastructure.
 The repository still contains many historical experiments outside the restored
 core. Their presence is not a guarantee that they run, interoperate, or satisfy
 the truth labels above.
+
+Run the finite secure-session demonstration with `npm run demo:session`.
 
 ## Safety
 

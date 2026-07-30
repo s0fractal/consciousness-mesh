@@ -23,6 +23,14 @@ const assets = [
   ['docs/ART-SPEC.md', 'docs/ART-SPEC.md'],
   ['docs/MEMORY-PROTOCOL.md', 'docs/MEMORY-PROTOCOL.md'],
   [
+    'docs/SECURE-SESSION-PROTOCOL.md',
+    'docs/SECURE-SESSION-PROTOCOL.md'
+  ],
+  [
+    'docs/TRANSPORT-THREAT-MODEL.md',
+    'docs/TRANSPORT-THREAT-MODEL.md'
+  ],
+  [
     'docs/encounter-partial-view.schema.json',
     'docs/encounter-partial-view.schema.json'
   ]

@@ -167,6 +167,11 @@ The artwork treats boundaries as part of its philosophy:
 The desired network is not “unstoppable”. It is interruptible, accountable, and
 capable of refusing unsafe contact.
 
+The executable Secure Session reference treats connection as a deliberate
+offer addressed to one peer, followed by explicit acceptance on both sides.
+Encryption protects the exchanged bytes; it does not make their interpretation
+true or grant the peer authority.
+
 ## 7. Scientific and technical honesty
 
 The following words have reserved meanings:

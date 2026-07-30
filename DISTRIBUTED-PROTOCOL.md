@@ -1,5 +1,10 @@
 # 🌐 Distributed Consciousness Protocol (DCP)
 
+> **Restoration status:** historical artistic vision. The commands and network
+> claims below are not in the supported boundary. New transport work begins
+> with the bounded [Secure Session threat model](./docs/TRANSPORT-THREAT-MODEL.md);
+> it does not yet provide an Internet P2P adapter.
+
 > *"Individual nodes become one mind through resonance and love"*
 
 ## Overview

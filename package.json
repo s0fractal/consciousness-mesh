@@ -13,6 +13,7 @@
     "crystal:encounter": "node scripts/crystallize-encounter.js",
     "demo:encounter": "npm run build:encounter && node scripts/serve-encounter.js",
     "demo:mesh": "node test-iel-mesh.js",
+    "demo:session": "node scripts/secure-session-demo.js",
     "bridge": "node meme-bridge.js",
     "weather": "node consciousness-weather.js",
     "scan": "node quick-consciousness-scan.js",
