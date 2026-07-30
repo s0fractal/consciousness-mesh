@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:consciousness-mesh:schema:encounter-partial-view:v1",
+  "title": "Consciousness Mesh encounter partial view",
+  "description": "A bounded in-process observation packet. It carries no identity or transport authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "source",
+    "logicalTime",
+    "sampleCount",
+    "fields"
+  ],
+  "properties": {
+    "version": {
+      "const": "thought/encounter-v1"
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 48
+    },
+    "logicalTime": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sampleCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 7
+    },
+    "fields": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["q", "heart", "theta"],
+      "properties": {
+        "q": {
+          "type": "number"
+        },
+        "heart": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "theta": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

@@ -6,9 +6,11 @@
   "type": "module",
   "main": "chronoflux-iel.js",
   "scripts": {
-    "start": "npm run demo:mesh",
+    "start": "npm run demo:encounter",
     "test": "node --test test/*.test.js",
     "check": "node scripts/check-restored-core.js",
+    "build:encounter": "node scripts/build-encounter.js",
+    "demo:encounter": "npm run build:encounter && node scripts/serve-encounter.js",
     "demo:mesh": "node test-iel-mesh.js",
     "bridge": "node meme-bridge.js",
     "weather": "node consciousness-weather.js",

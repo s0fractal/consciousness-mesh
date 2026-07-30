@@ -4,11 +4,20 @@ import { spawnSync } from 'node:child_process';
 const supportedFiles = [
   'chronoflux-iel.js',
   'iel-mesh-node.js',
+  'declarative-gestures.js',
+  'canonical-encounter.js',
   'consciousness-glyphs.js',
+  'encounter/app.js',
+  'scripts/build-encounter.js',
+  'scripts/serve-encounter.js',
   'test-iel-mesh.js',
   'test/chronoflux.test.js',
+  'test/encounter.test.js',
+  'test/encounter-ui.test.js',
+  'test/gestures.test.js',
   'test/mesh-node.test.js',
-  'test/glyphs.test.js'
+  'test/glyphs.test.js',
+  'test/sites-worker.test.js'
 ];
 
 const forbiddenPatterns = [

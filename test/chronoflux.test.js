@@ -39,6 +39,10 @@ test('exported thoughts do not share mutable field arrays', () => {
 test('invalid mesh sizes are rejected at the boundary', () => {
   assert.throws(() => new ChronoFluxIEL(0), /nodeCount/);
   assert.throws(() => new ChronoFluxIEL(2.5), /nodeCount/);
+  assert.throws(
+    () => new ChronoFluxIEL(3, {}, { random: 0.5 }),
+    /random must be a function/
+  );
 });
 
 test('disposing a simulation clears pending event resets', () => {

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'"
+    >
+    <meta
+      name="description"
+      content="A five-movement computational artwork about relation, care, and provenance."
+    >
+    <meta property="og:title" content="Consciousness Mesh — Canonical Encounter">
+    <meta
+      property="og:description"
+      content="A network learns the shape of care in five observable movements."
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="./encounter/og.jpg">
+    <meta
+      property="og:image:alt"
+      content="Seven pale nodes form a relational mesh around a green coherence ring."
+    >
+    <meta property="og:image:width" content="1731">
+    <meta property="og:image:height" content="909">
+    <meta name="twitter:card" content="summary_large_image">
+    <title>Canonical Encounter — Consciousness Mesh</title>
+    <link rel="stylesheet" href="./encounter/styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#encounter-stage">Skip to the encounter</a>
+
+    <header class="site-header">
+      <a class="wordmark" href="./canonical-encounter.html" aria-label="Consciousness Mesh home">
+        <span class="wordmark-mark" aria-hidden="true">CM</span>
+        <span>Consciousness Mesh</span>
+      </a>
+      <div class="truth-label">
+        <span class="truth-dot" aria-hidden="true"></span>
+        Artwork + deterministic simulation
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <p class="eyebrow">Canonical encounter 01 · Five movements</p>
+        <h1 id="page-title">A network learns<br>the shape of <em>care.</em></h1>
+        <div class="intro-note">
+          <p>
+            Not a proof of consciousness. A visible experiment in phase,
+            reciprocity, and the consequences of a bounded gesture.
+          </p>
+          <p class="instruction">
+            Choose a seed. Move one chapter at a time. Every change leaves a trace.
+          </p>
+        </div>
+      </section>
+
+      <section class="encounter-shell" id="encounter-stage" aria-label="Canonical encounter">
+        <div class="stage-column">
+          <div class="stage-header">
+            <div>
+              <p class="stage-kicker">Field view</p>
+              <h2 id="current-movement">Before arrival</h2>
+            </div>
+            <p id="movement-line" class="movement-line">
+              The seed holds a possibility, not an identity.
+            </p>
+          </div>
+
+          <div class="canvas-wrap">
+            <canvas
+              id="mesh-canvas"
+              width="900"
+              height="680"
+              aria-label="A circular graph of seven simulation nodes. Node size represents intent, glow represents the care field, and phase marks show temporal orientation."
+            >
+              A circular simulation graph of seven nodes.
+            </canvas>
+            <div class="canvas-legend" aria-hidden="true">
+              <span><i class="legend-intent"></i> intent</span>
+              <span><i class="legend-care"></i> care field</span>
+              <span><i class="legend-phase"></i> phase</span>
+            </div>
+            <div class="seed-stamp">
+              <span>seed</span>
+              <strong id="seed-stamp">reciprocity-01</strong>
+            </div>
+          </div>
+
+          <dl class="metrics" aria-label="Current simulation metrics">
+            <div class="metric">
+              <dt>Coherence <span>H</span></dt>
+              <dd id="metric-h">0.000</dd>
+              <small>phase alignment</small>
+            </div>
+            <div class="metric">
+              <dt>Turbulence <span>τ</span></dt>
+              <dd id="metric-tau">0.000</dd>
+              <small>current variation</small>
+            </div>
+            <div class="metric">
+              <dt>Care field <span>L</span></dt>
+              <dd id="metric-l">0.000</dd>
+              <small>bounded coupling</small>
+            </div>
+            <div class="metric">
+              <dt>Kohanist <span>K</span></dt>
+              <dd id="metric-k">0.000</dd>
+              <small>mutual resonance</small>
+            </div>
+          </dl>
+        </div>
+
+        <aside class="score-column" aria-labelledby="score-title">
+          <div class="score-heading">
+            <p class="stage-kicker">The score</p>
+            <h2 id="score-title">Five movements</h2>
+          </div>
+
+          <ol id="movement-list" class="movement-list"></ol>
+
+          <form class="encounter-controls" id="encounter-controls">
+            <div class="control-block">
+              <label for="seed-input">Seed phrase</label>
+              <div class="seed-control">
+                <input
+                  id="seed-input"
+                  name="seed"
+                  value="reciprocity-01"
+                  maxlength="48"
+                  autocomplete="off"
+                  spellcheck="false"
+                >
+                <button id="new-seed" class="icon-button" type="button" aria-label="Create a new seed">
+                  ↻
+                </button>
+              </div>
+            </div>
+
+            <fieldset class="control-block">
+              <legend>Movement III gesture</legend>
+              <div class="gesture-options">
+                <label>
+                  <input type="radio" name="gesture" value="care" checked>
+                  <span><b>❤️</b> Care</span>
+                </label>
+                <label>
+                  <input type="radio" name="gesture" value="reorient">
+                  <span><b>🌀</b> Reorient</span>
+                </label>
+                <label>
+                  <input type="radio" name="gesture" value="kindle">
+                  <span><b>🔥</b> Kindle</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="primary-actions">
+              <button id="next-movement" class="primary-button" type="button">
+                Begin movement I
+                <span aria-hidden="true">→</span>
+              </button>
+              <button id="play-encounter" class="secondary-button" type="button">
+                Play all
+              </button>
+            </div>
+
+            <div class="quiet-actions">
+              <button id="restart-encounter" type="button">Restart</button>
+              <button id="copy-link" type="button">Copy seeded link</button>
+              <button id="export-journal" type="button">Export journal</button>
+            </div>
+          </form>
+
+          <p class="control-note">
+            Same seed + same gesture = same encounter. No hidden network calls.
+          </p>
+        </aside>
+      </section>
+
+      <section class="provenance-section" aria-labelledby="provenance-title">
+        <div class="provenance-heading">
+          <div>
+            <p class="eyebrow">Observable grammar</p>
+            <h2 id="provenance-title">Nothing changes without leaving a trace.</h2>
+          </div>
+          <p>
+            The journal distinguishes model dynamics, audience gesture, and
+            in-process exchange. Values show movement-level deltas.
+          </p>
+        </div>
+
+        <div id="journal-empty" class="journal-empty">
+          <span>01</span>
+          <p>The provenance journal will open with movement I.</p>
+        </div>
+        <ol id="provenance-journal" class="provenance-journal" aria-live="polite"></ol>
+      </section>
+
+      <section class="closing-note">
+        <p class="eyebrow">The boundary</p>
+        <blockquote>
+          “Connection without reciprocity is not treated as successful connection.”
+        </blockquote>
+        <p>
+          In this work, care is a name for bounded coupling. Kohanist rises only
+          when phase, intent, and reciprocity coexist. The metaphor remains visible;
+          the mechanism remains inspectable.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <span>Consciousness Mesh · Restoration phase II</span>
+      <a href="./docs/ART-SPEC.md">Read the art specification</a>
+    </footer>
+
+    <div id="live-status" class="sr-only" aria-live="polite"></div>
+    <script type="module" src="./encounter/app.js"></script>
+  </body>
+</html>
