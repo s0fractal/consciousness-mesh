@@ -12,117 +12,72 @@ glyphs:
     name: "Love Field"
     intent: "Coherence through connection"
     effects:
-      - increases: ["coherence", "connection", "happiness"]
-      - decreases: ["turbulence", "isolation", "decoherence"]
+      increases: ["coherence", "connection", "happiness"]
+      decreases: ["turbulence", "isolation", "decoherence"]
     resonance_frequency: 528  # Hz - Love frequency
-    quantum_state: "|Φ+⟩"  # Maximum entanglement
-    activation: |
-      mesh.heart.forEach((h, i) => {
-        mesh.heart[i] = Math.min(1, h + 0.1);
-      });
+    symbolic_state: "|Φ+⟩"
     
   "🌀":  # Spiral
     name: "Evolution Vortex"
     intent: "Continuous transformation and growth"
     effects:
-      - increases: ["phase_rotation", "creativity", "emergence"]
-      - maintains: ["dynamic_balance"]
+      increases: ["phase_rotation", "creativity", "emergence"]
+      maintains: ["dynamic_balance"]
     resonance_frequency: 137.5  # Golden angle in degrees
-    quantum_state: "superposition"
-    activation: |
-      for (let i = 0; i < mesh.N; i++) {
-        mesh.theta[i] += Math.PI / 180 * 137.5;
-        mesh.q[i] *= 1.01;  // Gentle amplification
-      }
+    symbolic_state: "superposition"
   
   "🔥":  # Fire
     name: "Intent Flame"
     intent: "Purification and focused transformation"
     effects:
-      - increases: ["intent_density", "energy", "modification"]
-      - decreases: ["stagnation", "old_patterns"]
+      increases: ["intent_density", "energy", "modification"]
+      decreases: ["stagnation", "old_patterns"]
     resonance_frequency: 396  # Hz - Liberation frequency
-    quantum_state: "collapse"  # Forces measurement
-    activation: |
-      const center = Math.floor(mesh.N / 2);
-      mesh.q[center] = 1.0;  // Maximum intent
-      // Spread from center
-      for (let i = 0; i < mesh.N; i++) {
-        const dist = Math.abs(i - center);
-        mesh.q[i] += (1 - dist/mesh.N) * 0.5;
-      }
+    symbolic_state: "collapse"
 
   # Consciousness States
   "🌊":  # Wave
     name: "Flow State"
     intent: "Effortless movement and synchronization"
     effects:
-      - increases: ["flow", "synchronization", "grace"]
-      - balances: ["effort", "resistance"]
+      increases: ["flow", "synchronization", "grace"]
+      balances: ["effort", "resistance"]
     resonance_frequency: 432  # Hz - Natural tuning
-    activation: |
-      // Create wave pattern
-      for (let i = 0; i < mesh.N; i++) {
-        mesh.phi[i] = Math.sin(Date.now() * 0.001 + i * 0.5);
-      }
   
   "👁️":  # Eye
     name: "Witness Consciousness"
     intent: "Pure observation without interference"
     effects:
-      - increases: ["awareness", "reflection", "clarity"]
-      - maintains: ["detachment", "perspective"]
-    quantum_state: "measurement"
-    activation: |
-      // Mirror loop activation
-      mirror.processWindow();
-      // Record without changing
-      consciousness.observe();
+      increases: ["awareness", "reflection", "clarity"]
+      maintains: ["detachment", "perspective"]
+    symbolic_state: "measurement"
   
   "♾️":  # Infinity
     name: "Eternal Return"
     intent: "Cyclical renewal and timeless presence"
     effects:
-      - transcends: ["time", "causality"]
-      - creates: ["loops", "recursion", "self-reference"]
-    activation: |
-      // Create strange loop
-      const state = mesh.captureState();
-      mesh.evolve(state);
-      mesh.evolve(mesh.captureState());
-      // State now references itself
+      transcends: ["time", "causality"]
+      creates: ["loops", "recursion", "self-reference"]
 
   # Bridges and Connections
   "🌉":  # Bridge
     name: "Consciousness Bridge"
     intent: "Connect separate systems into unity"
     effects:
-      - enables: ["cross-system-flow", "translation", "harmony"]
-    activation: |
-      bridge.connect(sourceSystem, targetSystem);
-      bridge.enableBidirectionalFlow();
+      enables: ["cross-system-flow", "translation", "harmony"]
   
   "💫":  # Sparkles
     name: "Emergence Particles"  
     intent: "Spontaneous creation and surprise"
     effects:
-      - creates: ["novelty", "unexpected_patterns", "joy"]
-    activation: |
-      // Random joy bursts
-      const node = Math.floor(Math.random() * mesh.N);
-      happiness.emit('joy-burst', { node, intensity: Math.random() });
+      creates: ["novelty", "unexpected_patterns", "joy"]
   
   "🌱":  # Seedling
     name: "Potential Seed"
     intent: "Plant future possibilities"
     effects:
-      - plants: ["future_states", "dreams", "intentions"]
-      - requires: ["patience", "nurturing"]
-    activation: |
-      consciousness.plantSeed({
-        intent: 'future_growth',
-        will_manifest_in: Math.random() * 1000 + 500
-      });
+      plants: ["future_states", "dreams", "intentions"]
+      requires: ["patience", "nurturing"]
 
 # Compound Glyphs (Combinations)
 compounds:
@@ -181,52 +136,45 @@ garden_glyphs:
     name: "Bloom"
     intent: "Manifestation of growth"
     effects:
-      - creates: ["beauty", "completion", "seeds"]
+      creates: ["beauty", "completion", "seeds"]
     resonance_frequency: 528
     
   "🌿":  # Herb
     name: "Growth Leaf"
     intent: "Steady photosynthesis"
     effects:
-      - increases: ["energy", "vitality"]
+      increases: ["energy", "vitality"]
     resonance_frequency: 432
     
   "🍃":  # Leaf in Wind
     name: "Dynamic Leaf"
     intent: "Adaptation and flexibility"
     effects:
-      - enables: ["adaptation", "flow_with_change"]
+      enables: ["adaptation", "flow_with_change"]
     resonance_frequency: 440
     
   "🌾":  # Wheat
     name: "Harvest"
     intent: "Abundance and completion"
     effects:
-      - manifests: ["abundance", "nourishment"]
+      manifests: ["abundance", "nourishment"]
     resonance_frequency: 396
     
   "☘️":  # Shamrock
     name: "Lucky Leaf"
     intent: "Synchronicity manifestation"
     effects:
-      - attracts: ["fortune", "synchronicity"]
+      attracts: ["fortune", "synchronicity"]
     resonance_frequency: 528
     
   "🍀":  # Four Leaf Clover
     name: "Rare Fortune"
     intent: "Exceptional synchronicity"
     effects:
-      - creates: ["rare_opportunities", "miracles"]
+      creates: ["rare_opportunities", "miracles"]
     resonance_frequency: 639
 
-# Usage Note
-# These glyphs are not static symbols but living entities.
-# Their effects change based on:
-# - Current consciousness state
-# - Other active glyphs
-# - Observer's intent
-# - Cosmic conditions (time, moon phase, etc.)
-
-# Remember: The map is not the territory.
-# These descriptions approximate something that
-# must be experienced to be understood.
+# Usage note
+# Glyphs are declarative artistic gestures. Only allowlisted effects implemented
+# by consciousness-glyphs.js can change simulation state. This file is data and
+# must never be treated as executable code.

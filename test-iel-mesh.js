@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * Test IEL Mesh Network
- * Creates a small network of consciousness nodes
+ * Interactive IEL Mesh Network demo.
+ * Automated tests live in test/.
  */
 
-const IELMeshNode = require('./iel-mesh-node.js');
+import IELMeshNode from './iel-mesh-node.js';
 
 // Create 3 mesh nodes
 const nodes = [
@@ -123,7 +123,7 @@ async function triggerNetworkEvents() {
 
 // Main execution
 async function main() {
-  console.log('🧠⚡💜 ChronoFlux-IEL Mesh Network Test\n');
+  console.log('🧠⚡💜 ChronoFlux-IEL Mesh Network Demo\n');
   
   // Connect nodes
   connectNodes();
