@@ -123,6 +123,17 @@ The canonical minimal encounter has five movements:
 The encounter should be understandable in under five minutes and repeatable
 with a supplied random seed.
 
+The reference realization is `canonical-encounter.html`, backed by
+`canonical-encounter.js`. Its five movements are advanced explicitly or played
+as a short score. A seed and one of three declarative gestures determine the
+entire trace; replaying both inputs yields the same exported journal.
+
+Movement IV exchanges two partial views inside one process. The exchange is
+shown because relation without provenance would violate the work's grammar. It
+must not be described as authenticated identity, encrypted transport, or
+Internet P2P. Its bounded packet contract is published as
+`docs/encounter-partial-view.schema.json`.
+
 ## 5. Observable grammar
 
 Every canonical experience should expose:

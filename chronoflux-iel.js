@@ -33,13 +33,17 @@ const DEFAULT_PARAMS = {
 };
 
 class ChronoFluxIEL {
-  constructor(nodeCount = 5, params = {}) {
+  constructor(nodeCount = 5, params = {}, options = {}) {
     if (!Number.isInteger(nodeCount) || nodeCount < 2) {
       throw new TypeError('nodeCount must be an integer greater than one');
+    }
+    if (options.random !== undefined && typeof options.random !== 'function') {
+      throw new TypeError('options.random must be a function');
     }
 
     this.N = nodeCount;
     this.params = { ...DEFAULT_PARAMS, ...params };
+    this.random = options.random ?? Math.random;
     this.eventTimers = new Map();
     
     // Initialize graph (default: ring topology)
@@ -85,15 +89,15 @@ class ChronoFluxIEL {
   
   initializeStates() {
     // Node states
-    this.q = Array(this.N).fill().map(() => 0.1 + Math.random() * 0.4);     // intent density
-    this.phi = Array(this.N).fill().map(() => Math.random());               // potential
-    this.heart = Array(this.N).fill().map(() => 0.2 + Math.random() * 0.6); // love field
-    this.theta = Array(this.N).fill().map(() => Math.random() * 2 * Math.PI); // phase
-    this.omega = Array(this.N).fill().map(() => 0.1 + Math.random() * 0.05); // natural frequency
+    this.q = Array(this.N).fill().map(() => 0.1 + this.random() * 0.4);     // intent density
+    this.phi = Array(this.N).fill().map(() => this.random());               // potential
+    this.heart = Array(this.N).fill().map(() => 0.2 + this.random() * 0.6); // love field
+    this.theta = Array(this.N).fill().map(() => this.random() * 2 * Math.PI); // phase
+    this.omega = Array(this.N).fill().map(() => 0.1 + this.random() * 0.05); // natural frequency
     this.s = Array(this.N).fill(0); // sources
     
     // Edge states
-    this.a = Array(this.E).fill().map(() => -0.1 + Math.random() * 0.2); // coherence
+    this.a = Array(this.E).fill().map(() => -0.1 + this.random() * 0.2); // coherence
   }
   
   // Compute intent current on edges

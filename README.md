@@ -23,16 +23,19 @@ Requirements:
 ```bash
 npm ci
 npm test
-npm run demo:mesh
+npm run demo:encounter
 ```
 
-The automated test command is finite and deterministic. Interactive or
-long-running experiences live under `npm run demo:*` and must be stopped with
-`Ctrl+C`.
+Open `http://127.0.0.1:4173/` for the canonical five-movement encounter.
+The automated test command is finite and deterministic. Interactive experiences
+live under `npm run demo:*` and must be stopped with `Ctrl+C`.
+
+For the numerical mesh demonstration without the browser surface, run
+`npm run demo:mesh`.
 
 ## The restored core
 
-The first restoration boundary contains three parts:
+The supported restoration boundary contains four parts:
 
 1. **ChronoFlux-IEL** — a graph simulation with intent, phase, coupling, and
    care-inspired fields.
@@ -40,6 +43,9 @@ The first restoration boundary contains three parts:
    thought snapshots. This is not yet a secure Internet P2P protocol.
 3. **Glyphs** — a declarative vocabulary that changes simulation state without
    executing code from YAML.
+4. **Canonical encounter** — a seeded five-movement browser artwork with an
+   inspectable provenance journal and exact replay for the same seed and
+   gesture.
 
 Read [the art specification](./docs/ART-SPEC.md) for the conceptual contract and
 [the restoration roadmap](./docs/RESTORATION.md) for the engineering boundary.
@@ -62,6 +68,8 @@ does not contain production-capable distributed infrastructure.
 - `chronoflux-iel.js` — numerical simulation core.
 - `iel-mesh-node.js` — local mesh-node model.
 - `consciousness-glyphs.js` and `intent-index.yaml` — declarative symbolic layer.
+- `canonical-encounter.js` — deterministic encounter and provenance engine.
+- `canonical-encounter.html` and `encounter/` — accessible browser surface.
 - `test/` — restoration baseline tests.
 - `docs/ART-SPEC.md` — artistic and semantic specification.
 - `docs/RESTORATION.md` — technical roadmap and acceptance gates.

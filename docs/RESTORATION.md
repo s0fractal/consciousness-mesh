@@ -9,21 +9,31 @@ technical contract from a small, verifiable core.
 
 Acceptance gates:
 
-- clean install on the declared Node version;
-- finite `npm test`;
-- ESM-consistent ChronoFlux and mesh-node modules;
-- declarative glyph effects with no `eval` or `new Function`;
-- CI for install, tests, and syntax checks;
-- explicit security and truth-label documentation;
-- original vision preserved as historical art.
+- [x] clean install on the declared Node version;
+- [x] finite `npm test`;
+- [x] ESM-consistent ChronoFlux and mesh-node modules;
+- [x] declarative glyph effects with no `eval` or `new Function`;
+- [x] CI for install, tests, and syntax checks;
+- [x] explicit security and truth-label documentation;
+- [x] original vision preserved as historical art.
 
 ## Phase 2 — canonical encounter
 
-- seeded simulation and replayable event journal;
-- one accessible browser visualization;
-- provenance panel for every state change;
-- stable thought schema with structural validation;
-- visual and numerical regression tests.
+- [x] seeded simulation and replayable event journal;
+- [x] one accessible browser visualization;
+- [x] provenance panel for every state change;
+- [x] bounded partial-view schema with structural validation;
+- [x] browser-surface contract and numerical regression tests.
+
+Run the encounter with:
+
+```bash
+npm run demo:encounter
+```
+
+The partial-view exchange in this phase is deliberately in-process. It proves
+the encounter grammar and validation boundary, not authenticated peer
+transport.
 
 ## Phase 3 — trustworthy transport
 

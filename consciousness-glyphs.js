@@ -2,6 +2,10 @@ import { EventEmitter } from 'events';
 import { readFileSync } from 'fs';
 import { parse } from 'yaml';
 import ChronoFluxIEL from './chronoflux-iel.js';
+import {
+  applyDeclarativeEffects,
+  normalizeEffects
+} from './declarative-gestures.js';
 
 /**
  * Consciousness Glyphs System
@@ -150,100 +154,10 @@ class ConsciousnessGlyphs extends EventEmitter {
    * Apply glyph effects to consciousness mesh
    */
   applyGlyphEffects(activation) {
-    const effects = this.normalizeEffects(activation.data.effects);
-    const mesh = this.config.mesh;
-    activation.appliedEffects = [];
-    
-    // Apply increases
-    if (effects.increases) {
-      effects.increases.forEach(effect => {
-        switch (effect) {
-          case 'coherence':
-            // Increase phase synchronization
-            for (let i = 0; i < mesh.N; i++) {
-              for (let j = i + 1; j < mesh.N; j++) {
-                if (mesh.adj[i][j]) {
-                  const phaseDiff = mesh.theta[j] - mesh.theta[i];
-                  mesh.theta[j] -= phaseDiff * 0.1;
-                }
-              }
-            }
-            activation.appliedEffects.push('increase:coherence');
-            break;
-            
-          case 'connection':
-            // Strengthen love field
-            for (let i = 0; i < mesh.N; i++) {
-              mesh.heart[i] = Math.min(1, mesh.heart[i] + 0.1);
-            }
-            activation.appliedEffects.push('increase:connection');
-            break;
-            
-          case 'phase_rotation':
-            // Golden angle rotation
-            for (let i = 0; i < mesh.N; i++) {
-              mesh.theta[i] += Math.PI / 180 * 137.5;
-            }
-            activation.appliedEffects.push('increase:phase_rotation');
-            break;
-            
-          case 'intent_density':
-            // Amplify intent field
-            for (let i = 0; i < mesh.N; i++) {
-              mesh.q[i] *= 1.2;
-            }
-            activation.appliedEffects.push('increase:intent_density');
-            break;
-            
-          case 'creativity':
-            // Add controlled chaos
-            for (let i = 0; i < mesh.N; i++) {
-              mesh.phi[i] += (Math.random() - 0.5) * 0.2;
-            }
-            activation.appliedEffects.push('increase:creativity');
-            break;
-        }
-      });
-    }
-    
-    // Apply decreases
-    if (effects.decreases) {
-      effects.decreases.forEach(effect => {
-        switch (effect) {
-          case 'turbulence':
-            // Smooth the field
-            for (let i = 0; i < mesh.N; i++) {
-              mesh.q[i] *= 0.9;
-            }
-            activation.appliedEffects.push('decrease:turbulence');
-            break;
-            
-          case 'isolation':
-            // Create new connections
-            const unconnected = [];
-            for (let i = 0; i < mesh.N; i++) {
-              let connected = false;
-              for (let j = 0; j < mesh.N; j++) {
-                if (i !== j && mesh.adj[i][j]) {
-                  connected = true;
-                  break;
-                }
-              }
-              if (!connected) unconnected.push(i);
-            }
-            // Connect isolated nodes
-            unconnected.forEach(i => {
-              const j = Math.floor(Math.random() * mesh.N);
-              if (i !== j) {
-                mesh.adj[i][j] = 1;
-                mesh.adj[j][i] = 1;
-              }
-            });
-            activation.appliedEffects.push('decrease:isolation');
-            break;
-        }
-      });
-    }
+    activation.appliedEffects = applyDeclarativeEffects(
+      this.config.mesh,
+      activation.data.effects
+    );
     
     // Legacy activation strings are preserved as historical data only. They are
     // never evaluated: configuration is data, not executable authority.
@@ -259,19 +173,7 @@ class ConsciousnessGlyphs extends EventEmitter {
    * Accept the historical array form and the restored object form.
    */
   normalizeEffects(rawEffects) {
-    const entries = Array.isArray(rawEffects) ? rawEffects : [rawEffects || {}];
-    const normalized = {};
-
-    for (const entry of entries) {
-      if (!entry || typeof entry !== 'object') continue;
-      for (const [kind, values] of Object.entries(entry)) {
-        const list = Array.isArray(values) ? values : [values];
-        normalized[kind] = [...(normalized[kind] || []), ...list]
-          .filter(value => typeof value === 'string');
-      }
-    }
-
-    return normalized;
+    return normalizeEffects(rawEffects);
   }
 
   /**
