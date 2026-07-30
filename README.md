@@ -48,8 +48,9 @@ The supported restoration boundary contains six parts:
    gesture.
 5. **Memory Ledger** — canonical, content-addressed observations with
    append-only attributed interpretations and tamper-detecting import.
-6. **Secure Session core** — deliberately accepted peer identities and bounded
-   Ed25519/X25519/AES-GCM frames. It is not an Internet transport adapter.
+6. **Secure Session core** — a three-step consent handshake with stable
+   Ed25519 identity, ephemeral X25519 agreement, and bounded AES-GCM frames. It
+   is not an Internet transport adapter.
 
 Read [the art specification](./docs/ART-SPEC.md) for the conceptual contract and
 [the restoration roadmap](./docs/RESTORATION.md) for the engineering boundary.
@@ -80,6 +81,7 @@ does not contain production-capable distributed infrastructure.
 - `docs/ART-SPEC.md` — artistic and semantic specification.
 - `docs/MEMORY-PROTOCOL.md` — executable memory and integrity contract.
 - `docs/SECURE-SESSION-PROTOCOL.md` — authenticated session wire contract.
+- `docs/SECURE-SESSION-V1.md` — retired static-key protocol history.
 - `docs/TRANSPORT-THREAT-MODEL.md` — security guarantees and non-guarantees.
 - `docs/RESTORATION.md` — technical roadmap and acceptance gates.
 - `docs/LEGACY-VISION.md` — the original expansive vision, preserved as an

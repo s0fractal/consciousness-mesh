@@ -5,8 +5,13 @@ const bob = new SecureIdentity('dusk');
 const offer = alice.createSessionOffer(bob.exportPublicIdentity(), {
   maxTtl: 3
 });
-const dawnSession = alice.openSession(bob.exportPublicIdentity(), offer);
-const duskSession = bob.openSession(alice.exportPublicIdentity(), offer);
+const accepted = bob.acceptSession(alice.exportPublicIdentity(), offer);
+const dawnSession = alice.completeSession(
+  bob.exportPublicIdentity(),
+  offer,
+  accepted.acceptance
+);
+const duskSession = accepted.session;
 
 const frame = dawnSession.seal({
   type: 'partial-view/demo-v1',
@@ -18,7 +23,8 @@ const frame = dawnSession.seal({
 const opened = duskSession.open(frame);
 
 console.log(JSON.stringify({
-  protocol: 'secure-frame/v1',
+  protocol: 'secure-frame/v2',
+  handshake: 'offer → acceptance → completion',
   algorithms: [
     'Ed25519',
     'X25519',

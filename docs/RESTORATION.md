@@ -40,6 +40,7 @@ transport.
 - [x] threat model before implementation;
 - [x] framed messages with strict byte and rate limits;
 - [x] authenticated peer identity and encrypted session core;
+- [x] signed ephemeral key agreement with forward secrecy after completion;
 - [x] replay protection and bounded propagation;
 - [x] adversarial protocol tests;
 - [x] no claim of Internet-ready P2P.
@@ -47,7 +48,7 @@ transport.
 The phase-3 result is `secure-session.js`, a transport-independent protocol
 core. It deliberately opens no sockets. Internet exposure remains blocked until
 a separately reviewed adapter adds network admission limits, durable replay
-state, key rotation, forward secrecy, and interoperability evidence. See
+state, identity rotation and recovery, and interoperability evidence. See
 [the threat model](./TRANSPORT-THREAT-MODEL.md).
 
 ## Phase 4 — memory and content integrity

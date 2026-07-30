@@ -26,6 +26,7 @@ const assets = [
     'docs/SECURE-SESSION-PROTOCOL.md',
     'docs/SECURE-SESSION-PROTOCOL.md'
   ],
+  ['docs/SECURE-SESSION-V1.md', 'docs/SECURE-SESSION-V1.md'],
   [
     'docs/TRANSPORT-THREAT-MODEL.md',
     'docs/TRANSPORT-THREAT-MODEL.md'

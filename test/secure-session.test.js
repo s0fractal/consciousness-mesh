@@ -2,6 +2,10 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import {
+  SECURE_FRAME_VERSION,
+  SECURE_IDENTITY_VERSION,
+  SESSION_ACCEPTANCE_VERSION,
+  SESSION_OFFER_VERSION,
   SecureIdentity,
   SecureSessionError
 } from '../secure-session.js';
@@ -15,17 +19,22 @@ function createPair(options = {}) {
   const bob = new SecureIdentity('bob', { clock });
   const offer = alice.createSessionOffer(bob.exportPublicIdentity(), {
     createdAt: new Date(now).toISOString(),
-    maxTtl: options.maxTtl ?? 8
+    maxTtl: options.maxTtl ?? 8,
+    limits: options.limits
   });
   const limits = options.limits;
-  const aliceSession = alice.openSession(
-    bob.exportPublicIdentity(),
-    offer,
-    { limits }
-  );
-  const bobSession = bob.openSession(
+  const accepted = bob.acceptSession(
     alice.exportPublicIdentity(),
     offer,
+    {
+      acceptedAt: new Date(now).toISOString(),
+      limits
+    }
+  );
+  const aliceSession = alice.completeSession(
+    bob.exportPublicIdentity(),
+    offer,
+    accepted.acceptance,
     { limits }
   );
 
@@ -33,7 +42,8 @@ function createPair(options = {}) {
     alice,
     bob,
     aliceSession,
-    bobSession,
+    bobSession: accepted.session,
+    acceptance: accepted.acceptance,
     offer,
     advance(milliseconds) {
       now += milliseconds;
@@ -67,14 +77,11 @@ test('authenticated sessions encrypt canonical payloads in both directions', () 
   );
 });
 
-test('identity proofs bind peer IDs to signing and exchange keys', () => {
+test('identity proofs bind stable peer IDs without static exchange keys', () => {
   const alice = new SecureIdentity('alice');
   const bob = new SecureIdentity('bob');
   const tampered = bob.exportPublicIdentity();
-  tampered.exchangeKey = (
-    tampered.exchangeKey.slice(0, -1)
-    + (tampered.exchangeKey.endsWith('A') ? 'B' : 'A')
-  );
+  tampered.label = 'mallory';
 
   assert.throws(
     () => alice.createSessionOffer(tampered),
@@ -86,8 +93,247 @@ test('identity proofs bind peer IDs to signing and exchange keys', () => {
   assert.match(alice.peerId, /^sha256:[a-f0-9]{64}$/);
   assert.deepEqual(
     Object.keys(alice.exportPublicIdentity()).sort(),
-    ['exchangeKey', 'label', 'peerId', 'proof', 'signingKey', 'version']
+    ['label', 'peerId', 'proof', 'signingKey', 'version']
   );
+});
+
+test('the v2 handshake uses fresh signed ephemeral keys on both sides', () => {
+  const alice = new SecureIdentity('alice', { clock: () => baseTime });
+  const bob = new SecureIdentity('bob', { clock: () => baseTime });
+  const bobIdentity = bob.exportPublicIdentity();
+  const first = alice.createSessionOffer(bobIdentity);
+  const second = alice.createSessionOffer(bobIdentity);
+
+  assert.equal(first.version, SESSION_OFFER_VERSION);
+  assert.equal(alice.exportPublicIdentity().version, SECURE_IDENTITY_VERSION);
+  assert.equal('exchangeKey' in alice.exportPublicIdentity(), false);
+  assert.notEqual(first.ephemeralKey, second.ephemeralKey);
+
+  const accepted = bob.acceptSession(alice.exportPublicIdentity(), first);
+  assert.equal(accepted.acceptance.version, SESSION_ACCEPTANCE_VERSION);
+  assert.notEqual(accepted.acceptance.ephemeralKey, first.ephemeralKey);
+
+  const aliceSession = alice.completeSession(
+    bobIdentity,
+    first,
+    accepted.acceptance
+  );
+  const frame = aliceSession.seal({ fresh: true });
+  assert.equal(JSON.parse(frame).version, SECURE_FRAME_VERSION);
+  assert.deepEqual(accepted.session.open(frame).payload, { fresh: true });
+  alice.cancelSessionOffer(second.sessionId);
+});
+
+test('acceptance tampering and cross-offer substitution preserve pending state', () => {
+  const alice = new SecureIdentity('alice', { clock: () => baseTime });
+  const bob = new SecureIdentity('bob', { clock: () => baseTime });
+  const first = alice.createSessionOffer(bob.exportPublicIdentity());
+  const second = alice.createSessionOffer(bob.exportPublicIdentity());
+  const firstAccepted = bob.acceptSession(
+    alice.exportPublicIdentity(),
+    first
+  );
+
+  const tampered = {
+    ...firstAccepted.acceptance,
+    ephemeralKey: second.ephemeralKey
+  };
+  assert.throws(
+    () => alice.completeSession(
+      bob.exportPublicIdentity(),
+      first,
+      tampered
+    ),
+    error => (
+      error instanceof SecureSessionError
+      && ['INVALID_ACCEPTANCE', 'INVALID_KEY'].includes(error.code)
+    )
+  );
+
+  const secondBob = new SecureIdentity('second-bob', {
+    clock: () => baseTime
+  });
+  const foreignOffer = alice.createSessionOffer(
+    secondBob.exportPublicIdentity()
+  );
+  const foreignAcceptance = secondBob.acceptSession(
+    alice.exportPublicIdentity(),
+    foreignOffer
+  ).acceptance;
+  assert.throws(
+    () => alice.completeSession(
+      bob.exportPublicIdentity(),
+      first,
+      foreignAcceptance
+    ),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'INVALID_ACCEPTANCE'
+    )
+  );
+
+  const recovered = alice.completeSession(
+    bob.exportPublicIdentity(),
+    first,
+    firstAccepted.acceptance
+  );
+  assert.deepEqual(
+    recovered.open(firstAccepted.session.seal({ recovered: true })).payload,
+    { recovered: true }
+  );
+  alice.cancelSessionOffer(second.sessionId);
+  alice.cancelSessionOffer(foreignOffer.sessionId);
+});
+
+test('handshake byte and temporal bounds fail before session creation', () => {
+  const alice = new SecureIdentity('alice', { clock: () => baseTime });
+  const bob = new SecureIdentity('bob', { clock: () => baseTime });
+  const offer = alice.createSessionOffer(bob.exportPublicIdentity());
+
+  assert.throws(
+    () => bob.acceptSession(alice.exportPublicIdentity(), {
+      ...offer,
+      ephemeralKey: 'A'.repeat(9_000)
+    }),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'HANDSHAKE_TOO_LARGE'
+    )
+  );
+  assert.throws(
+    () => bob.acceptSession(
+      alice.exportPublicIdentity(),
+      offer,
+      {
+        acceptedAt: new Date(baseTime - 30_001).toISOString()
+      }
+    ),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'INVALID_ACCEPTANCE'
+    )
+  );
+
+  const accepted = bob.acceptSession(alice.exportPublicIdentity(), offer);
+  const session = alice.completeSession(
+    bob.exportPublicIdentity(),
+    offer,
+    accepted.acceptance
+  );
+  assert.deepEqual(
+    accepted.session.open(session.seal({ bounded: true })).payload,
+    { bounded: true }
+  );
+});
+
+test('v2 refuses handshake downgrade instead of negotiating legacy crypto', () => {
+  const alice = new SecureIdentity('alice', { clock: () => baseTime });
+  const bob = new SecureIdentity('bob', { clock: () => baseTime });
+  const offer = alice.createSessionOffer(bob.exportPublicIdentity());
+
+  assert.throws(
+    () => bob.acceptSession(alice.exportPublicIdentity(), {
+      ...offer,
+      version: 'session-offer/v1'
+    }),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'DOWNGRADE_REFUSED'
+    )
+  );
+
+  const accepted = bob.acceptSession(alice.exportPublicIdentity(), offer);
+  assert.throws(
+    () => alice.completeSession(
+      bob.exportPublicIdentity(),
+      offer,
+      {
+        ...accepted.acceptance,
+        version: 'session-acceptance/v1'
+      }
+    ),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'DOWNGRADE_REFUSED'
+    )
+  );
+  alice.completeSession(
+    bob.exportPublicIdentity(),
+    offer,
+    accepted.acceptance
+  );
+  assert.throws(
+    () => alice.completeSession(
+      bob.exportPublicIdentity(),
+      offer,
+      accepted.acceptance
+    ),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'SESSION_REUSE'
+    )
+  );
+});
+
+test('pending offers are cancellable, expiring, and strictly bounded', () => {
+  let now = baseTime;
+  const clock = () => now;
+  const alice = new SecureIdentity('alice', { clock });
+  const bob = new SecureIdentity('bob', { clock });
+  const limits = { maxPendingOffers: 1 };
+  const first = alice.createSessionOffer(bob.exportPublicIdentity(), {
+    limits
+  });
+
+  assert.throws(
+    () => alice.createSessionOffer(bob.exportPublicIdentity(), { limits }),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'PENDING_LIMIT'
+    )
+  );
+  assert.equal(alice.cancelSessionOffer(first.sessionId), true);
+  assert.equal(alice.cancelSessionOffer(first.sessionId), false);
+
+  const expiring = alice.createSessionOffer(bob.exportPublicIdentity(), {
+    limits
+  });
+  now += 300_001;
+  const replacement = alice.createSessionOffer(bob.exportPublicIdentity(), {
+    limits
+  });
+  assert.notEqual(replacement.sessionId, expiring.sessionId);
+  assert.equal(alice.cancelSessionOffer(expiring.sessionId), false);
+  assert.equal(alice.cancelSessionOffer(replacement.sessionId), true);
+});
+
+test('disposed identities refuse new or pending handshake work', () => {
+  const alice = new SecureIdentity('alice', { clock: () => baseTime });
+  const bob = new SecureIdentity('bob', { clock: () => baseTime });
+  const offer = alice.createSessionOffer(bob.exportPublicIdentity());
+  const accepted = bob.acceptSession(alice.exportPublicIdentity(), offer);
+
+  alice.dispose();
+  alice.dispose();
+  assert.throws(
+    () => alice.completeSession(
+      bob.exportPublicIdentity(),
+      offer,
+      accepted.acceptance
+    ),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'IDENTITY_CLOSED'
+    )
+  );
+  assert.throws(
+    () => alice.createSessionOffer(bob.exportPublicIdentity()),
+    error => (
+      error instanceof SecureSessionError
+      && error.code === 'IDENTITY_CLOSED'
+    )
+  );
+  accepted.session.dispose();
 });
 
 test('ciphertext, metadata, and signatures reject tampering', () => {
@@ -156,9 +402,14 @@ test('frames are bound to their intended peer and session', () => {
     charlie.exportPublicIdentity(),
     { createdAt: new Date(baseTime).toISOString() }
   );
-  const aliceCharlie = pair.alice.openSession(
-    charlie.exportPublicIdentity(),
+  const accepted = charlie.acceptSession(
+    pair.alice.exportPublicIdentity(),
     offer
+  );
+  const aliceCharlie = pair.alice.completeSession(
+    charlie.exportPublicIdentity(),
+    offer,
+    accepted.acceptance
   );
   const frameForBob = pair.aliceSession.seal({ intended: 'bob' });
 
@@ -264,10 +515,10 @@ test('expired and reused offers are refused', () => {
     createdAt: new Date(now - 300_001).toISOString()
   });
   assert.throws(
-    () => bob.openSession(alice.exportPublicIdentity(), expired),
+    () => bob.acceptSession(alice.exportPublicIdentity(), expired),
     error => (
       error instanceof SecureSessionError
-      && error.code === 'EXPIRED_OFFER'
+      && error.code === 'EXPIRED_HANDSHAKE'
     )
   );
 
@@ -276,15 +527,15 @@ test('expired and reused offers are refused', () => {
   });
   const modified = { ...current, maxTtl: current.maxTtl - 1 };
   assert.throws(
-    () => bob.openSession(alice.exportPublicIdentity(), modified),
+    () => bob.acceptSession(alice.exportPublicIdentity(), modified),
     error => (
       error instanceof SecureSessionError
       && error.code === 'INVALID_OFFER'
     )
   );
-  bob.openSession(alice.exportPublicIdentity(), current);
+  bob.acceptSession(alice.exportPublicIdentity(), current);
   assert.throws(
-    () => bob.openSession(alice.exportPublicIdentity(), current),
+    () => bob.acceptSession(alice.exportPublicIdentity(), current),
     error => (
       error instanceof SecureSessionError
       && error.code === 'SESSION_REUSE'
@@ -312,7 +563,7 @@ test('malformed inputs fail closed and disposed sessions stay closed', () => {
     '',
     'not json',
     '{}',
-    '{"version":"secure-frame/v1"}'
+    '{"version":"secure-frame/v2"}'
   ]) {
     assert.throws(
       () => pair.bobSession.open(malformed),
@@ -351,11 +602,11 @@ test('identities, offers, timestamps, and clocks reject ambiguous input', () => 
   const bob = new SecureIdentity('bob', { clock: () => baseTime });
   const identityWithAccessor = bob.exportPublicIdentity();
   let accessorRead = false;
-  Object.defineProperty(identityWithAccessor, 'exchangeKey', {
+  Object.defineProperty(identityWithAccessor, 'signingKey', {
     enumerable: true,
     get() {
       accessorRead = true;
-      return bob.exportPublicIdentity().exchangeKey;
+      return bob.exportPublicIdentity().signingKey;
     }
   });
   assert.throws(
@@ -398,7 +649,7 @@ test('identities, offers, timestamps, and clocks reject ambiguous input', () => 
     }
   });
   assert.throws(
-    () => bob.openSession(alice.exportPublicIdentity(), offer),
+    () => bob.acceptSession(alice.exportPublicIdentity(), offer),
     error => (
       error instanceof SecureSessionError
       && error.code === 'INVALID_OFFER'
@@ -414,7 +665,7 @@ test('the finite session demonstration keeps its transport claim local', () => {
   assert.equal(result.status, 0, result.stderr);
 
   const transcript = JSON.parse(result.stdout);
-  assert.equal(transcript.protocol, 'secure-frame/v1');
+  assert.equal(transcript.protocol, 'secure-frame/v2');
   assert.match(transcript.transport, /in-process demonstration/);
   assert.equal(transcript.remainingHops, 1);
   assert.deepEqual(transcript.algorithms, [
