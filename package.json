@@ -12,6 +12,7 @@
     "build:encounter": "node scripts/build-encounter.js",
     "crystal:encounter": "node scripts/crystallize-encounter.js",
     "demo:encounter": "npm run build:encounter && node scripts/serve-encounter.js",
+    "demo:exhibition": "npm run build:encounter && node scripts/serve-encounter.js --exhibition",
     "demo:mesh": "node test-iel-mesh.js",
     "demo:session": "node scripts/secure-session-demo.js",
     "bridge": "node meme-bridge.js",

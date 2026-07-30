@@ -52,7 +52,8 @@
             reciprocity, and the consequences of a bounded gesture.
           </p>
           <p class="instruction">
-            Choose a seed. Move one chapter at a time. Every change leaves a trace.
+            Choose a seed. Move one chapter at a time, or enter the five-minute
+            exhibition score. Every change leaves a trace.
           </p>
         </div>
       </section>
@@ -75,9 +76,11 @@
               width="900"
               height="680"
               aria-label="A circular graph of seven simulation nodes. Node size represents intent, glow represents the care field, and phase marks show temporal orientation."
+              aria-describedby="canvas-state"
             >
               A circular simulation graph of seven nodes.
             </canvas>
+            <p id="canvas-state" class="sr-only"></p>
             <div class="canvas-legend" aria-hidden="true">
               <span><i class="legend-intent"></i> intent</span>
               <span><i class="legend-care"></i> care field</span>
@@ -120,6 +123,46 @@
           </div>
 
           <ol id="movement-list" class="movement-list"></ol>
+
+          <section
+            id="exhibition-panel"
+            class="exhibition-panel"
+            aria-labelledby="exhibition-title"
+          >
+            <div class="exhibition-heading">
+              <div>
+                <p class="stage-kicker">Timed score</p>
+                <h3 id="exhibition-title">Five-minute exhibition</h3>
+              </div>
+              <output id="exhibition-time" aria-label="Time remaining">05:00</output>
+            </div>
+            <progress
+              id="exhibition-progress"
+              max="300000"
+              value="0"
+              aria-label="Exhibition score elapsed"
+            ></progress>
+            <p id="exhibition-status">
+              Five deterministic cues, followed by a final interval for
+              reflection.
+            </p>
+            <div class="exhibition-actions">
+              <button
+                id="toggle-exhibition"
+                class="secondary-button"
+                type="button"
+                aria-pressed="false"
+              >
+                Start five-minute score
+              </button>
+              <button id="exit-exhibition" type="button" hidden>
+                Exit exhibition mode
+              </button>
+            </div>
+            <p class="exhibition-shortcuts">
+              Space pauses or resumes · Esc pauses · R restarts
+            </p>
+          </section>
 
           <form class="encounter-controls" id="encounter-controls">
             <div class="control-block">
@@ -213,8 +256,11 @@
     </main>
 
     <footer>
-      <span>Consciousness Mesh · Restoration phase II</span>
+      <span>Consciousness Mesh · Restoration phase V · Private exhibition build</span>
       <nav aria-label="Project documents">
+        <a href="./docs/CURATORIAL-STATEMENT.md">Curatorial statement</a>
+        <a href="./docs/EXHIBITION-GUIDE.md">Operator guide</a>
+        <a href="./docs/ACCESSIBILITY-AUDIT.md">Accessibility</a>
         <a href="./docs/ART-SPEC.md">Art specification</a>
         <a href="./docs/MEMORY-PROTOCOL.md">Memory protocol</a>
         <a href="./docs/SECURE-SESSION-PROTOCOL.md">Session protocol</a>

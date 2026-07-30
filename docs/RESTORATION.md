@@ -66,11 +66,17 @@ integrity claim. See [the protocol](./MEMORY-PROTOCOL.md).
 
 ## Phase 5 — exhibition release
 
-- five-minute canonical encounter;
-- curatorial statement and operator guide;
-- accessibility review;
-- packaged local exhibition mode;
-- public release only after security and claim audits.
+- [x] five-minute canonical encounter;
+- [x] curatorial statement and operator guide;
+- [x] implemented accessibility review with explicit unverified surfaces;
+- [x] packaged local/private exhibition mode;
+- [ ] public release only after security, claim, assistive-technology, and
+  cross-browser audits.
+
+The exhibition score changes presentation time, not simulation semantics.
+Hidden-tab time is excluded; pause, restart, manual mode, and journal export
+remain available throughout. See the [operator guide](./EXHIBITION-GUIDE.md)
+and [accessibility audit](./ACCESSIBILITY-AUDIT.md).
 
 ## Non-goals
 

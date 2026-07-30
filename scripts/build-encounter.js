@@ -18,9 +18,13 @@ const assets = [
   ['chronoflux-iel.js', 'chronoflux-iel.js'],
   ['declarative-gestures.js', 'declarative-gestures.js'],
   ['encounter/app.js', 'encounter/app.js'],
+  ['encounter/exhibition-score.js', 'encounter/exhibition-score.js'],
   ['encounter/og.jpg', 'encounter/og.jpg'],
   ['encounter/styles.css', 'encounter/styles.css'],
+  ['docs/ACCESSIBILITY-AUDIT.md', 'docs/ACCESSIBILITY-AUDIT.md'],
   ['docs/ART-SPEC.md', 'docs/ART-SPEC.md'],
+  ['docs/CURATORIAL-STATEMENT.md', 'docs/CURATORIAL-STATEMENT.md'],
+  ['docs/EXHIBITION-GUIDE.md', 'docs/EXHIBITION-GUIDE.md'],
   ['docs/MEMORY-PROTOCOL.md', 'docs/MEMORY-PROTOCOL.md'],
   [
     'docs/SECURE-SESSION-PROTOCOL.md',
