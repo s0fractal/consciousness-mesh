@@ -62,6 +62,10 @@ test('the canonical composition fixes the field at seven nodes', () => {
     () => new CanonicalEncounter({ nodeCount: 8 }),
     /exactly seven nodes/
   );
+  assert.throws(
+    () => new CanonicalEncounter({ gesture: 'unknown' }),
+    /Unknown gesture/
+  );
 });
 
 test('exchange validates bounded in-process provenance packets', () => {

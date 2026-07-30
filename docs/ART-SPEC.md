@@ -110,6 +110,11 @@ of subjective experience.
 Memory is persisted state plus provenance. Healing or reframing memory must
 append interpretation; it must not silently erase the original evidence.
 
+The executable reference is `memory-ledger.js`. It separates the content ID of
+an observed subject from the ID of the historical act that recorded it. Later
+facets may conflict, but each remains attributable and chained; ordering does
+not grant any facet semantic supremacy.
+
 ## 4. Canonical encounter
 
 The canonical minimal encounter has five movements:

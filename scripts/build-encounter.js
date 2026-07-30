@@ -21,6 +21,7 @@ const assets = [
   ['encounter/og.jpg', 'encounter/og.jpg'],
   ['encounter/styles.css', 'encounter/styles.css'],
   ['docs/ART-SPEC.md', 'docs/ART-SPEC.md'],
+  ['docs/MEMORY-PROTOCOL.md', 'docs/MEMORY-PROTOCOL.md'],
   [
     'docs/encounter-partial-view.schema.json',
     'docs/encounter-partial-view.schema.json'

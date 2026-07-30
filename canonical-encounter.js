@@ -111,7 +111,8 @@ export class CanonicalEncounter {
     if (this.nodeCount !== 7) {
       throw new RangeError('The canonical encounter requires exactly seven nodes');
     }
-    this.gestureId = options.gesture ?? 'care';
+    this.gestureId = 'care';
+    this.setGesture(options.gesture ?? 'care', true);
     this.reset();
   }
 

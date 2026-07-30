@@ -714,6 +714,11 @@ footer a {
   text-underline-offset: 0.25rem;
 }
 
+footer nav {
+  display: flex;
+  gap: 1.25rem;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -824,6 +829,10 @@ footer a {
     gap: 1rem;
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  footer nav {
+    flex-wrap: wrap;
   }
 }
 
