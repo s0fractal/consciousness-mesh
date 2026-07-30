@@ -22,6 +22,12 @@ test('the Sites worker serves the exact encounter build', async () => {
   const protocolHistory = await worker.fetch(
     new Request('https://mesh.example/docs/SECURE-SESSION-V1.md')
   );
+  const exhibitionScore = await worker.fetch(
+    new Request('https://mesh.example/encounter/exhibition-score.js')
+  );
+  const curatorialStatement = await worker.fetch(
+    new Request('https://mesh.example/docs/CURATORIAL-STATEMENT.md')
+  );
 
   assert.equal(page.status, 200);
   assert.match(html, /content="https:\/\/mesh\.example\/encounter\/og\.jpg"/);
@@ -30,6 +36,8 @@ test('the Sites worker serves the exact encounter build', async () => {
   assert.ok((await image.arrayBuffer()).byteLength > 100_000);
   assert.match(await protocol.text(), /version 2 reference protocol/);
   assert.match(await protocolHistory.text(), /retired/);
+  assert.match(await exhibitionScore.text(), /EXHIBITION_DURATION_MS = 300_000/);
+  assert.match(await curatorialStatement.text(), /inspectable metaphor/);
   assert.equal(
     (
       await worker.fetch(new Request('https://mesh.example/', {

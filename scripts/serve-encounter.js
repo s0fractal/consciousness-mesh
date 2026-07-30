@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 const repositoryRoot = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const root = normalize(join(repositoryRoot, 'dist', 'encounter'));
 const port = Number.parseInt(process.env.ENCOUNTER_PORT || '4173', 10);
+const exhibitionMode = process.argv.includes('--exhibition');
 
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
   throw new RangeError('ENCOUNTER_PORT must be an integer from 1 to 65535');
@@ -15,6 +16,7 @@ if (!Number.isInteger(port) || port < 1 || port > 65535) {
 const contentTypes = new Map([
   ['.css', 'text/css; charset=utf-8'],
   ['.html', 'text/html; charset=utf-8'],
+  ['.jpg', 'image/jpeg'],
   ['.js', 'text/javascript; charset=utf-8'],
   ['.json', 'application/json; charset=utf-8'],
   ['.md', 'text/markdown; charset=utf-8'],
@@ -64,7 +66,10 @@ const server = createServer(async (request, response) => {
 });
 
 server.listen(port, '127.0.0.1', () => {
-  console.log(`Canonical encounter: http://127.0.0.1:${port}/`);
+  const path = exhibitionMode
+    ? '/?mode=exhibition&seed=reciprocity-01&gesture=care'
+    : '/';
+  console.log(`Canonical encounter: http://127.0.0.1:${port}${path}`);
 });
 
 for (const signal of ['SIGINT', 'SIGTERM']) {

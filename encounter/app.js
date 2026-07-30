@@ -3,9 +3,15 @@ import {
   GESTURES,
   MOVEMENTS
 } from '../canonical-encounter.js';
+import {
+  EXHIBITION_DURATION_MS,
+  EXHIBITION_SCORE_VERSION,
+  ExhibitionScore
+} from './exhibition-score.js';
 
 const elements = {
   canvas: document.querySelector('#mesh-canvas'),
+  canvasState: document.querySelector('#canvas-state'),
   currentMovement: document.querySelector('#current-movement'),
   movementLine: document.querySelector('#movement-line'),
   movementList: document.querySelector('#movement-list'),
@@ -17,6 +23,12 @@ const elements = {
   newSeedButton: document.querySelector('#new-seed'),
   copyLinkButton: document.querySelector('#copy-link'),
   exportButton: document.querySelector('#export-journal'),
+  exhibitionPanel: document.querySelector('#exhibition-panel'),
+  exhibitionTime: document.querySelector('#exhibition-time'),
+  exhibitionProgress: document.querySelector('#exhibition-progress'),
+  exhibitionStatus: document.querySelector('#exhibition-status'),
+  exhibitionButton: document.querySelector('#toggle-exhibition'),
+  exitExhibitionButton: document.querySelector('#exit-exhibition'),
   journal: document.querySelector('#provenance-journal'),
   journalEmpty: document.querySelector('#journal-empty'),
   liveStatus: document.querySelector('#live-status'),
@@ -31,8 +43,12 @@ const elements = {
 const context = elements.canvas.getContext('2d');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let playTimer = null;
+let exhibitionTimer = null;
+let exhibitionActive = false;
+let exhibitionScore = new ExhibitionScore();
 
 const initialParameters = new URLSearchParams(window.location.search);
+const requestedExhibitionMode = initialParameters.get('mode') === 'exhibition';
 const initialSeed = cleanSeed(initialParameters.get('seed') || 'reciprocity-01');
 const initialGesture = GESTURES[initialParameters.get('gesture')]
   ? initialParameters.get('gesture')
@@ -96,15 +112,19 @@ function createMovementList() {
 function render() {
   const state = encounter.getState();
   renderCanvas(state.snapshot);
+  renderCanvasState(state);
   renderMetrics(state.snapshot.metrics);
   renderMovementState(state);
   renderJournal(state.journal);
+  renderExhibition();
   elements.seedStamp.textContent = state.seed;
 
   const gestureInputs = document.querySelectorAll('input[name="gesture"]');
   for (const input of gestureInputs) {
-    input.disabled = state.movementIndex > 2;
+    input.disabled = exhibitionActive || state.movementIndex > 2;
   }
+  elements.seedInput.disabled = exhibitionActive;
+  elements.newSeedButton.disabled = exhibitionActive;
 }
 
 function renderMetrics(metrics) {
@@ -118,6 +138,11 @@ function renderMovementState(state) {
   for (const [index, item] of movementItems.entries()) {
     item.classList.toggle('complete', index < state.movementIndex);
     item.classList.toggle('current', index === state.movementIndex);
+    if (index === state.movementIndex) {
+      item.setAttribute('aria-current', 'step');
+    } else {
+      item.removeAttribute('aria-current');
+    }
   }
 
   if (state.completed) {
@@ -126,7 +151,7 @@ function renderMovementState(state) {
     elements.nextButton.textContent = 'Encounter complete';
     elements.nextButton.disabled = true;
     elements.playButton.textContent = 'Play again';
-    elements.playButton.disabled = false;
+    elements.playButton.disabled = exhibitionActive;
     return;
   }
 
@@ -146,8 +171,71 @@ function renderMovementState(state) {
   arrow.setAttribute('aria-hidden', 'true');
   arrow.textContent = '→';
   elements.nextButton.append(arrow);
-  elements.nextButton.disabled = false;
+  elements.nextButton.disabled = exhibitionActive;
   elements.playButton.textContent = playTimer ? 'Pause' : 'Play all';
+  elements.playButton.disabled = exhibitionActive;
+}
+
+function renderCanvasState(state) {
+  const metrics = state.snapshot.metrics;
+  const movement = state.journal.at(-1)?.movement;
+  elements.canvasState.textContent = [
+    movement
+      ? `Current movement: ${movement.number}, ${movement.title}.`
+      : 'The encounter has not begun.',
+    'Seven nodes are arranged in a circular relational graph.',
+    `Coherence ${formatMetric(metrics.H)}.`,
+    `Turbulence ${formatMetric(metrics.tau)}.`,
+    `Care field ${formatMetric(metrics.L)}.`,
+    `Kohanist ${formatMetric(metrics.K)}.`
+  ].join(' ');
+}
+
+function formatExhibitionTime(milliseconds) {
+  const seconds = Math.ceil(Math.max(0, milliseconds) / 1000);
+  const minutes = Math.floor(seconds / 60);
+  return `${String(minutes).padStart(2, '0')}:${String(
+    seconds % 60
+  ).padStart(2, '0')}`;
+}
+
+function renderExhibition() {
+  const score = exhibitionScore.getState();
+  document.body.classList.toggle('exhibition-active', exhibitionActive);
+  elements.exhibitionProgress.max = EXHIBITION_DURATION_MS;
+  elements.exhibitionProgress.value = score.elapsedMs;
+  elements.exhibitionTime.value = formatExhibitionTime(
+    exhibitionActive ? score.remainingMs : EXHIBITION_DURATION_MS
+  );
+  elements.exhibitionButton.setAttribute(
+    'aria-pressed',
+    String(exhibitionActive && score.playing)
+  );
+  elements.exitExhibitionButton.hidden = !exhibitionActive;
+
+  if (!exhibitionActive) {
+    elements.exhibitionButton.textContent = 'Start five-minute score';
+    elements.exhibitionStatus.textContent = (
+      'Five deterministic cues, followed by a final interval for reflection.'
+    );
+    return;
+  }
+  if (score.completed) {
+    elements.exhibitionButton.textContent = 'Replay five-minute score';
+    elements.exhibitionStatus.textContent = (
+      'Score complete. The final pattern and its provenance remain visible.'
+    );
+    return;
+  }
+  elements.exhibitionButton.textContent = score.playing
+    ? 'Pause exhibition'
+    : 'Resume exhibition';
+  const awaiting = score.nextCueIndex < MOVEMENTS.length
+    ? `cue ${score.nextCueIndex + 1} of ${MOVEMENTS.length} awaits`
+    : 'final reflection interval';
+  elements.exhibitionStatus.textContent = score.playing
+    ? `Exhibition running · ${awaiting}.`
+    : `Exhibition paused · ${awaiting}.`;
 }
 
 function renderCanvas(snapshot) {
@@ -307,18 +395,35 @@ function updateUrl() {
   const url = new URL(window.location.href);
   url.searchParams.set('seed', encounter.seed);
   url.searchParams.set('gesture', encounter.gestureId);
+  if (exhibitionActive) {
+    url.searchParams.set('mode', 'exhibition');
+  } else {
+    url.searchParams.delete('mode');
+  }
   window.history.replaceState({}, '', url);
 }
 
-function restart() {
+function resetEncounter() {
   stopPlayback();
   const seed = cleanSeed(elements.seedInput.value);
   const gesture = selectedGesture();
   elements.seedInput.value = seed;
   encounter = new CanonicalEncounter({ seed, gesture });
+}
+
+function restart() {
+  resetEncounter();
+  if (exhibitionActive) {
+    exhibitionScore.restart(performance.now());
+    scheduleExhibitionTick();
+  }
   updateUrl();
   render();
-  announce(`Encounter reset with seed ${seed}.`);
+  announce(
+    exhibitionActive
+      ? `Five-minute exhibition restarted with seed ${encounter.seed}.`
+      : `Encounter reset with seed ${encounter.seed}.`
+  );
 }
 
 function advance() {
@@ -336,7 +441,7 @@ function playNext() {
   }
   advance();
   if (!encounter.completed && playTimer) {
-    playTimer = window.setTimeout(playNext, prefersReducedMotion.matches ? 250 : 1100);
+    playTimer = window.setTimeout(playNext, 1100);
   } else {
     stopPlayback();
   }
@@ -356,6 +461,93 @@ function stopPlayback() {
   if (playTimer) window.clearTimeout(playTimer);
   playTimer = null;
   elements.playButton.textContent = encounter.completed ? 'Play again' : 'Play all';
+}
+
+function clearExhibitionTimer() {
+  if (exhibitionTimer) window.clearTimeout(exhibitionTimer);
+  exhibitionTimer = null;
+}
+
+function scheduleExhibitionTick() {
+  clearExhibitionTimer();
+  if (!exhibitionActive || !exhibitionScore.getState().playing) return;
+  exhibitionTimer = window.setTimeout(
+    exhibitionTick,
+    prefersReducedMotion.matches ? 1000 : 250
+  );
+}
+
+function applyExhibitionUpdate(update) {
+  for (const cueIndex of update.enteredCueIndexes) {
+    if (cueIndex === encounter.movementIndex && !encounter.completed) {
+      advance();
+    }
+  }
+  renderExhibition();
+  if (update.state.completed) {
+    clearExhibitionTimer();
+    announce(
+      'Five-minute exhibition complete. The provenance trace remains available.'
+    );
+  }
+}
+
+function exhibitionTick() {
+  const update = exhibitionScore.advance(performance.now());
+  applyExhibitionUpdate(update);
+  scheduleExhibitionTick();
+}
+
+function beginExhibition() {
+  clearExhibitionTimer();
+  resetEncounter();
+  exhibitionActive = true;
+  exhibitionScore = new ExhibitionScore();
+  exhibitionScore.start(performance.now());
+  updateUrl();
+  render();
+  scheduleExhibitionTick();
+  announce(
+    `Five-minute exhibition started with seed ${encounter.seed} and gesture ${
+      GESTURES[encounter.gestureId].name
+    }.`
+  );
+}
+
+function pauseExhibition(reason = 'Exhibition paused.') {
+  if (!exhibitionActive || !exhibitionScore.getState().playing) return;
+  const update = exhibitionScore.pause(performance.now());
+  applyExhibitionUpdate(update);
+  clearExhibitionTimer();
+  renderExhibition();
+  announce(reason);
+}
+
+function toggleExhibition() {
+  const state = exhibitionScore.getState();
+  if (!exhibitionActive || state.completed) {
+    beginExhibition();
+    return;
+  }
+  if (state.playing) {
+    pauseExhibition();
+    return;
+  }
+  exhibitionScore.start(performance.now());
+  renderExhibition();
+  scheduleExhibitionTick();
+  announce('Exhibition resumed.');
+}
+
+function exitExhibition() {
+  if (!exhibitionActive) return;
+  pauseExhibition('Exhibition paused before exit.');
+  clearExhibitionTimer();
+  exhibitionActive = false;
+  exhibitionScore = new ExhibitionScore();
+  updateUrl();
+  render();
+  announce('Exhibition mode exited. Manual controls are available.');
 }
 
 function createNewSeed() {
@@ -381,7 +573,21 @@ async function copySeededLink() {
 }
 
 function exportJournal() {
-  const data = JSON.stringify(encounter.exportJournal(), null, 2);
+  const exported = encounter.exportJournal();
+  const data = JSON.stringify({
+    ...exported,
+    presentation: exhibitionActive
+      ? {
+          version: EXHIBITION_SCORE_VERSION,
+          mode: 'five-minute exhibition',
+          durationMs: EXHIBITION_DURATION_MS,
+          timingAffectsSimulation: false
+        }
+      : {
+          mode: 'manual',
+          timingAffectsSimulation: false
+        }
+  }, null, 2);
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
@@ -402,6 +608,8 @@ elements.restartButton.addEventListener('click', restart);
 elements.newSeedButton.addEventListener('click', createNewSeed);
 elements.copyLinkButton.addEventListener('click', copySeededLink);
 elements.exportButton.addEventListener('click', exportJournal);
+elements.exhibitionButton.addEventListener('click', toggleExhibition);
+elements.exitExhibitionButton.addEventListener('click', exitExhibition);
 elements.seedInput.addEventListener('change', restart);
 
 for (const input of document.querySelectorAll('input[name="gesture"]')) {
@@ -415,15 +623,29 @@ for (const input of document.querySelectorAll('input[name="gesture"]')) {
 }
 
 document.addEventListener('keydown', event => {
-  if (event.target.matches('input')) return;
-  if (event.key.toLowerCase() === 'n') advance();
+  if (event.target.closest?.('input, button, a, select, textarea')) return;
+  if (event.key.toLowerCase() === 'n' && !exhibitionActive) advance();
   if (event.key.toLowerCase() === 'r') restart();
+  if (event.key === 'Escape' && exhibitionActive) {
+    pauseExhibition('Exhibition paused with Escape.');
+  }
   if (event.key === ' ') {
     event.preventDefault();
-    togglePlayback();
+    if (exhibitionActive) {
+      toggleExhibition();
+    } else {
+      togglePlayback();
+    }
+  }
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && exhibitionActive) {
+    pauseExhibition('Exhibition paused because the page is hidden.');
   }
 });
 
 createMovementList();
 updateUrl();
 render();
+if (requestedExhibitionMode) beginExhibition();

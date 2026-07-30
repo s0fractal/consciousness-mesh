@@ -126,12 +126,16 @@ The canonical minimal encounter has five movements:
 5. The audience sees both the resulting pattern and the provenance of change.
 
 The encounter should be understandable in under five minutes and repeatable
-with a supplied random seed.
+with a supplied random seed. Its exhibition realization is a five-minute score:
+movements enter at 00:20, 01:10, 02:05, 03:05, and 04:05, followed by a final
+55-second interval in which the completed field remains inspectable.
 
 The reference realization is `canonical-encounter.html`, backed by
 `canonical-encounter.js`. Its five movements are advanced explicitly or played
 as a short score. A seed and one of three declarative gestures determine the
 entire trace; replaying both inputs yields the same exported journal.
+Wall-clock timing affects only when deterministic movements are presented. It
+does not enter the simulation or change the exported movement trace.
 
 Movement IV exchanges two partial views inside one process. The exchange is
 shown because relation without provenance would violate the work's grammar. It

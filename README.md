@@ -33,6 +33,11 @@ live under `npm run demo:*` and must be stopped with `Ctrl+C`.
 For the numerical mesh demonstration without the browser surface, run
 `npm run demo:mesh`.
 
+The private five-minute installation is available by adding
+`?mode=exhibition&seed=reciprocity-01&gesture=care` to the encounter URL. Read
+[the operator guide](./docs/EXHIBITION-GUIDE.md) before exhibition use, or run
+`npm run demo:exhibition` for the packaged local score.
+
 ## The restored core
 
 The supported restoration boundary contains six parts:
@@ -79,6 +84,9 @@ does not contain production-capable distributed infrastructure.
 - `secure-session.js` — authenticated, encrypted protocol core.
 - `test/` — restoration baseline tests.
 - `docs/ART-SPEC.md` — artistic and semantic specification.
+- `docs/CURATORIAL-STATEMENT.md` — visitor-facing curatorial frame.
+- `docs/EXHIBITION-GUIDE.md` — five-minute score and operator contract.
+- `docs/ACCESSIBILITY-AUDIT.md` — implemented access paths and open limits.
 - `docs/MEMORY-PROTOCOL.md` — executable memory and integrity contract.
 - `docs/SECURE-SESSION-PROTOCOL.md` — authenticated session wire contract.
 - `docs/SECURE-SESSION-V1.md` — retired static-key protocol history.
