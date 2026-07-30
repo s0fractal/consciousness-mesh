@@ -37,12 +37,18 @@ transport.
 
 ## Phase 3 — trustworthy transport
 
-- threat model before implementation;
-- framed messages with strict byte and rate limits;
-- authenticated peer identity and encrypted transport;
-- replay protection and bounded propagation;
-- adversarial protocol tests;
-- no claim of Internet-ready P2P until these gates pass.
+- [x] threat model before implementation;
+- [x] framed messages with strict byte and rate limits;
+- [x] authenticated peer identity and encrypted session core;
+- [x] replay protection and bounded propagation;
+- [x] adversarial protocol tests;
+- [x] no claim of Internet-ready P2P.
+
+The phase-3 result is `secure-session.js`, a transport-independent protocol
+core. It deliberately opens no sockets. Internet exposure remains blocked until
+a separately reviewed adapter adds network admission limits, durable replay
+state, key rotation, forward secrecy, and interoperability evidence. See
+[the threat model](./TRANSPORT-THREAT-MODEL.md).
 
 ## Phase 4 — memory and content integrity
 

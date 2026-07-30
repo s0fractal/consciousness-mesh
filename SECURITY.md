@@ -2,11 +2,16 @@
 
 ## Current support boundary
 
-Only the local ChronoFlux simulation, in-process mesh model, and declarative
-glyph layer are in the restoration support boundary.
+The restoration support boundary includes the local ChronoFlux simulation,
+in-process mesh model, declarative glyph layer, canonical encounter, append-only
+Memory Ledger, and the transport-independent Secure Session protocol core.
 
 The legacy HTTP, WebSocket, TCP, Bluetooth, IPFS-named, autonomous, and bridge
 experiments are not safe to expose to untrusted input or networks.
+
+`secure-session.js` authenticates and encrypts bounded in-process frames but
+does not open a socket or make the legacy transports safe. Read
+[the threat model](./docs/TRANSPORT-THREAT-MODEL.md) before building an adapter.
 
 ## Reporting
 

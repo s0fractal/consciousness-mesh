@@ -8,6 +8,8 @@ test('canonical encounter exposes its truth label and external assets', async ()
   assert.match(html, /Artwork \+ deterministic simulation/);
   assert.match(html, /Not a proof of consciousness/);
   assert.match(html, /\.\/docs\/MEMORY-PROTOCOL\.md/);
+  assert.match(html, /\.\/docs\/SECURE-SESSION-PROTOCOL\.md/);
+  assert.match(html, /\.\/docs\/TRANSPORT-THREAT-MODEL\.md/);
   assert.match(html, /<script type="module" src="\.\/encounter\/app\.js"><\/script>/);
   assert.doesNotMatch(html, /<script(?![^>]*\bsrc=)[^>]*>/);
   assert.doesNotMatch(html, /<style\b/);
