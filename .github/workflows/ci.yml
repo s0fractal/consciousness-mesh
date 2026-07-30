@@ -1,0 +1,29 @@
+name: restoration-ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  restored-core:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version:
+          - 22
+          - 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - run: npm audit --audit-level=high

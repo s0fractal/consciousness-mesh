@@ -34,8 +34,13 @@ const DEFAULT_PARAMS = {
 
 class ChronoFluxIEL {
   constructor(nodeCount = 5, params = {}) {
+    if (!Number.isInteger(nodeCount) || nodeCount < 2) {
+      throw new TypeError('nodeCount must be an integer greater than one');
+    }
+
     this.N = nodeCount;
     this.params = { ...DEFAULT_PARAMS, ...params };
+    this.eventTimers = new Map();
     
     // Initialize graph (default: ring topology)
     this.initializeGraph();
@@ -229,7 +234,7 @@ class ChronoFluxIEL {
         this.params.sigma *= 1.5;
         this.params.eta *= 0.5;
         this.params.eta_l *= 0.5;
-        setTimeout(() => {
+        this.scheduleEventReset(() => {
           this.params.sigma /= 1.5;
           this.params.eta *= 2;
           this.params.eta_l *= 2;
@@ -238,11 +243,16 @@ class ChronoFluxIEL {
         
       case 'INTENT_PULSE':
         // Local intent injection
-        const nodeId = params.nodeId || 0;
-        this.s[nodeId] += params.strength || 1.0;
+        const nodeId = params.nodeId ?? 0;
+        const strength = params.strength ?? 1.0;
+        this.assertNodeIndex(nodeId);
+        if (!Number.isFinite(strength)) {
+          throw new TypeError('strength must be finite');
+        }
+        this.s[nodeId] += strength;
         this.params.beta_l *= 1.5;
-        setTimeout(() => {
-          this.s[nodeId] -= params.strength || 1.0;
+        this.scheduleEventReset(() => {
+          this.s[nodeId] -= strength;
           this.params.beta_l /= 1.5;
         }, 500);
         break;
@@ -255,8 +265,10 @@ class ChronoFluxIEL {
         
       case 'KOHANIST_RESONANCE':
         // Boost mutual resonance between specified nodes
-        const node1 = params.node1 || 0;
-        const node2 = params.node2 || 1;
+        const node1 = params.node1 ?? 0;
+        const node2 = params.node2 ?? 1;
+        this.assertNodeIndex(node1);
+        this.assertNodeIndex(node2);
         
         // Align phases
         const avgTheta = (this.theta[node1] + this.theta[node2]) / 2;
@@ -272,7 +284,33 @@ class ChronoFluxIEL {
         this.heart[node1] = Math.min(1, this.heart[node1] * 1.5);
         this.heart[node2] = Math.min(1, this.heart[node2] * 1.5);
         break;
+
+      default:
+        throw new RangeError(`Unknown event type: ${eventType}`);
     }
+  }
+
+  assertNodeIndex(nodeId) {
+    if (!Number.isInteger(nodeId) || nodeId < 0 || nodeId >= this.N) {
+      throw new RangeError(`node index out of range: ${nodeId}`);
+    }
+  }
+
+  scheduleEventReset(callback, delayMs) {
+    const timer = setTimeout(() => {
+      this.eventTimers.delete(timer);
+      callback();
+    }, delayMs);
+    this.eventTimers.set(timer, callback);
+    return timer;
+  }
+
+  dispose() {
+    for (const [timer, reset] of this.eventTimers) {
+      clearTimeout(timer);
+      reset();
+    }
+    this.eventTimers.clear();
   }
   
   // Run simulation
@@ -345,13 +383,5 @@ class ChronoFluxIEL {
   }
 }
 
-// Export for use in mesh
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = ChronoFluxIEL;
-} else if (typeof window !== 'undefined') {
-  window.ChronoFluxIEL = ChronoFluxIEL;
-}
-
-// ES module export
 export default ChronoFluxIEL;
 export { ChronoFluxIEL };

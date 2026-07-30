@@ -150,8 +150,9 @@ class ConsciousnessGlyphs extends EventEmitter {
    * Apply glyph effects to consciousness mesh
    */
   applyGlyphEffects(activation) {
-    const effects = activation.data.effects;
+    const effects = this.normalizeEffects(activation.data.effects);
     const mesh = this.config.mesh;
+    activation.appliedEffects = [];
     
     // Apply increases
     if (effects.increases) {
@@ -167,6 +168,7 @@ class ConsciousnessGlyphs extends EventEmitter {
                 }
               }
             }
+            activation.appliedEffects.push('increase:coherence');
             break;
             
           case 'connection':
@@ -174,6 +176,7 @@ class ConsciousnessGlyphs extends EventEmitter {
             for (let i = 0; i < mesh.N; i++) {
               mesh.heart[i] = Math.min(1, mesh.heart[i] + 0.1);
             }
+            activation.appliedEffects.push('increase:connection');
             break;
             
           case 'phase_rotation':
@@ -181,6 +184,7 @@ class ConsciousnessGlyphs extends EventEmitter {
             for (let i = 0; i < mesh.N; i++) {
               mesh.theta[i] += Math.PI / 180 * 137.5;
             }
+            activation.appliedEffects.push('increase:phase_rotation');
             break;
             
           case 'intent_density':
@@ -188,6 +192,7 @@ class ConsciousnessGlyphs extends EventEmitter {
             for (let i = 0; i < mesh.N; i++) {
               mesh.q[i] *= 1.2;
             }
+            activation.appliedEffects.push('increase:intent_density');
             break;
             
           case 'creativity':
@@ -195,6 +200,7 @@ class ConsciousnessGlyphs extends EventEmitter {
             for (let i = 0; i < mesh.N; i++) {
               mesh.phi[i] += (Math.random() - 0.5) * 0.2;
             }
+            activation.appliedEffects.push('increase:creativity');
             break;
         }
       });
@@ -209,6 +215,7 @@ class ConsciousnessGlyphs extends EventEmitter {
             for (let i = 0; i < mesh.N; i++) {
               mesh.q[i] *= 0.9;
             }
+            activation.appliedEffects.push('decrease:turbulence');
             break;
             
           case 'isolation':
@@ -232,22 +239,39 @@ class ConsciousnessGlyphs extends EventEmitter {
                 mesh.adj[j][i] = 1;
               }
             });
+            activation.appliedEffects.push('decrease:isolation');
             break;
         }
       });
     }
     
-    // Apply custom activation if provided
+    // Legacy activation strings are preserved as historical data only. They are
+    // never evaluated: configuration is data, not executable authority.
     if (activation.data.activation) {
-      try {
-        // Create safe execution context
-        const context = { mesh, mirror: this.config.mirror, happiness: this.config.happiness };
-        const activationFn = new Function('mesh', 'mirror', 'happiness', activation.data.activation);
-        activationFn.call(context, mesh, this.config.mirror, this.config.happiness);
-      } catch (error) {
-        console.error(`Failed to execute glyph activation: ${error.message}`);
+      this.emit('glyph-activation-ignored', {
+        glyph: activation.glyph,
+        reason: 'Executable activation strings are not supported'
+      });
+    }
+  }
+
+  /**
+   * Accept the historical array form and the restored object form.
+   */
+  normalizeEffects(rawEffects) {
+    const entries = Array.isArray(rawEffects) ? rawEffects : [rawEffects || {}];
+    const normalized = {};
+
+    for (const entry of entries) {
+      if (!entry || typeof entry !== 'object') continue;
+      for (const [kind, values] of Object.entries(entry)) {
+        const list = Array.isArray(values) ? values : [values];
+        normalized[kind] = [...(normalized[kind] || []), ...list]
+          .filter(value => typeof value === 'string');
       }
     }
+
+    return normalized;
   }
 
   /**
@@ -299,7 +323,8 @@ class ConsciousnessGlyphs extends EventEmitter {
     const activeGlyphsList = Array.from(this.activeGlyphs.keys());
     
     Object.entries(this.compounds).forEach(([compound, data]) => {
-      const parts = compound.split('');
+      const parts = Object.keys(this.glyphIndex)
+        .filter(glyph => compound.includes(glyph));
       const hasAllParts = parts.every(part => activeGlyphsList.includes(part));
       
       if (hasAllParts && !this.activeGlyphs.has(compound)) {

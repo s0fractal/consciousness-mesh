@@ -3,11 +3,12 @@
  * Integrates ChronoFlux-IEL with mesh networking
  */
 
-const ChronoFluxIEL = require('./chronoflux-iel.js');
-const EventEmitter = require('events');
+import { createHash } from 'node:crypto';
+import { EventEmitter } from 'node:events';
+import ChronoFluxIEL from './chronoflux-iel.js';
 
 class IELMeshNode extends EventEmitter {
-  constructor(nodeId, meshSize = 10) {
+  constructor(nodeId, meshSize = 10, config = {}) {
     super();
     
     this.nodeId = nodeId;
@@ -15,13 +16,20 @@ class IELMeshNode extends EventEmitter {
     this.peers = new Map(); // peerId -> connection
     this.thoughtCache = new Map(); // CID -> thought
     this.syncInterval = null;
+    this.simulationInterval = null;
+    this.thoughtInterval = null;
+    this.pendingTransmissions = new Set();
+    this.started = false;
     
     // Configuration
     this.config = {
       syncIntervalMs: 1000,
+      simulationIntervalMs: 100,
+      thoughtIntervalMs: 5000,
       thoughtTTL: 300000, // 5 minutes
       maxThoughtSize: 10000, // bytes
-      resonanceThreshold: 0.7
+      resonanceThreshold: 0.7,
+      ...config
     };
     
     console.log(`🧠 IEL Mesh Node ${nodeId} initialized`);
@@ -29,6 +37,9 @@ class IELMeshNode extends EventEmitter {
   
   // Start the node
   async start() {
+    if (this.started) return;
+    this.started = true;
+
     // Start IEL simulation
     this.startSimulation();
     
@@ -43,10 +54,25 @@ class IELMeshNode extends EventEmitter {
   
   // Stop the node
   async stop() {
-    if (this.syncInterval) {
-      clearInterval(this.syncInterval);
+    for (const timer of [
+      this.syncInterval,
+      this.simulationInterval,
+      this.thoughtInterval
+    ]) {
+      if (timer) clearInterval(timer);
     }
-    
+
+    for (const timer of this.pendingTransmissions) {
+      clearTimeout(timer);
+    }
+
+    this.syncInterval = null;
+    this.simulationInterval = null;
+    this.thoughtInterval = null;
+    this.pendingTransmissions.clear();
+    this.iel.dispose();
+    this.started = false;
+
     this.emit('stopped', { nodeId: this.nodeId });
   }
   
@@ -76,7 +102,7 @@ class IELMeshNode extends EventEmitter {
         return;
       }
       
-      // Generate CID (simplified - use real CID in production)
+      // Generate a cryptographic local content identifier.
       const cid = this.generateCID(thought);
       
       // Check if we've seen this thought
@@ -125,9 +151,11 @@ class IELMeshNode extends EventEmitter {
       this.emit('thought:sent', { peerId, thought });
       
       // Simulate network delay
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        this.pendingTransmissions.delete(timer);
         peer.emit?.('thought', this.nodeId, thought);
       }, Math.random() * 100);
+      this.pendingTransmissions.add(timer);
       
     } catch (error) {
       console.error(`Error sending to ${peerId}:`, error);
@@ -173,17 +201,17 @@ class IELMeshNode extends EventEmitter {
     
     // Merge fields with weighted average
     this.iel.q = this.iel.q.map((local, i) => 
-      local * (1 - alpha) + (remoteThought.fields.q?.[i] || local) * alpha
+      local * (1 - alpha) + (remoteThought.fields.q?.[i] ?? local) * alpha
     );
     
     this.iel.heart = this.iel.heart.map((local, i) => 
-      local * (1 - alpha) + (remoteThought.fields.heart?.[i] || local) * alpha
+      local * (1 - alpha) + (remoteThought.fields.heart?.[i] ?? local) * alpha
     );
     
     // Phase synchronization (Kuramoto-style)
     if (remoteThought.fields.theta) {
       this.iel.theta = this.iel.theta.map((local, i) => {
-        const remote = remoteThought.fields.theta[i] || local;
+        const remote = remoteThought.fields.theta[i] ?? local;
         const diff = Math.sin(remote - local);
         return (local + this.iel.params.K * diff) % (2 * Math.PI);
       });
@@ -199,15 +227,43 @@ class IELMeshNode extends EventEmitter {
     if (!thought || typeof thought !== 'object') return false;
     if (thought.type !== 'thought/v1') return false;
     if (!thought.metrics || !thought.fields) return false;
+    if (!Number.isFinite(thought.ts)) return false;
     
     // Size check
-    const size = JSON.stringify(thought).length;
+    let serialized;
+    try {
+      serialized = JSON.stringify(thought);
+    } catch {
+      return false;
+    }
+    const size = Buffer.byteLength(serialized, 'utf8');
     if (size > this.config.maxThoughtSize) return false;
+
+    const metricNames = ['H', 'tau', 'L'];
+    if (!metricNames.every(name => Number.isFinite(thought.metrics[name]))) {
+      return false;
+    }
+    if (
+      thought.metrics.H < 0 || thought.metrics.H > 1
+      || thought.metrics.L < 0 || thought.metrics.L > 1
+      || thought.metrics.tau < 0
+    ) {
+      return false;
+    }
+
+    const fieldNames = ['q', 'phi', 'heart', 'theta'];
+    if (!fieldNames.every(name => (
+      Array.isArray(thought.fields[name])
+      && thought.fields[name].length === this.iel.N
+      && thought.fields[name].every(Number.isFinite)
+    ))) {
+      return false;
+    }
     
     return true;
   }
   
-  // Generate CID for thought (simplified)
+  // Generate a cryptographic local content ID. This is not an IPFS CID.
   generateCID(thought) {
     const content = JSON.stringify({
       type: thought.type,
@@ -216,15 +272,7 @@ class IELMeshNode extends EventEmitter {
       ts: thought.ts
     });
     
-    // In production, use proper IPFS CID generation
-    let hash = 0;
-    for (let i = 0; i < content.length; i++) {
-      const char = content.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    
-    return `thought-${Math.abs(hash).toString(16)}`;
+    return `sha256:${createHash('sha256').update(content).digest('hex')}`;
   }
   
   // Clean old thoughts from cache
@@ -241,7 +289,7 @@ class IELMeshNode extends EventEmitter {
   
   // Start IEL simulation
   startSimulation() {
-    setInterval(() => {
+    this.simulationInterval = setInterval(() => {
       // Run simulation steps
       this.iel.simulate(10, 10);
       
@@ -263,7 +311,7 @@ class IELMeshNode extends EventEmitter {
         this.emit('turbulence:high', metrics);
       }
       
-    }, 100); // 10Hz update
+    }, this.config.simulationIntervalMs);
   }
   
   // Start peer synchronization
@@ -288,21 +336,21 @@ class IELMeshNode extends EventEmitter {
   // Start autonomous thought generation
   startThoughtGeneration() {
     // Random events to create diversity
-    setInterval(() => {
+    this.thoughtInterval = setInterval(() => {
       const rand = Math.random();
       
-      if (rand < 0.1) {
+      if (rand < 0.05) {
+        // Random lion gate
+        this.iel.applyEvent('LION_GATE');
+        this.emit('event:triggered', { type: 'LION_GATE' });
+      } else if (rand < 0.15) {
         // Random intent pulse
         const nodeId = Math.floor(Math.random() * this.iel.N);
         this.iel.applyEvent('INTENT_PULSE', { nodeId, strength: 0.5 });
         this.emit('event:triggered', { type: 'INTENT_PULSE', nodeId });
-      } else if (rand < 0.05) {
-        // Random lion gate
-        this.iel.applyEvent('LION_GATE');
-        this.emit('event:triggered', { type: 'LION_GATE' });
       }
       
-    }, 5000); // Every 5 seconds
+    }, this.config.thoughtIntervalMs);
   }
   
   // Get current state summary
@@ -317,7 +365,5 @@ class IELMeshNode extends EventEmitter {
   }
 }
 
-// Export for use
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = IELMeshNode;
-}
+export { IELMeshNode };
+export default IELMeshNode;
