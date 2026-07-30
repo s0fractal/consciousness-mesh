@@ -53,7 +53,8 @@
           </p>
           <p class="instruction">
             Choose a seed. Move one chapter at a time, or enter the five-minute
-            exhibition score. Every change leaves a trace.
+            exhibition score. Every change leaves a trace. A finished encounter
+            may leave one voluntary afterimage on this device.
           </p>
         </div>
       </section>
@@ -69,6 +70,18 @@
               The seed holds a possibility, not an identity.
             </p>
           </div>
+
+          <aside
+            id="afterimage-echo"
+            class="afterimage-echo"
+            aria-labelledby="afterimage-echo-title"
+            hidden
+          >
+            <p class="stage-kicker">A prior local echo</p>
+            <h3 id="afterimage-echo-title">This was remembered here:</h3>
+            <blockquote id="afterimage-echo-text"></blockquote>
+            <p id="afterimage-echo-origin"></p>
+          </aside>
 
           <div class="canvas-wrap">
             <canvas
@@ -242,6 +255,78 @@
         <ol id="provenance-journal" class="provenance-journal" aria-live="polite"></ol>
       </section>
 
+      <section class="afterimage-section" aria-labelledby="afterimage-title">
+        <div class="afterimage-heading">
+          <div>
+            <p class="eyebrow">Phase VI · Local memory</p>
+            <h2 id="afterimage-title">An afterimage may remain.</h2>
+          </div>
+          <div class="afterimage-boundary">
+            <p>
+              Nothing is saved automatically. A reflection stays in this
+              browser profile, is never sent by this artwork, and never changes
+              the simulation.
+            </p>
+            <p>
+              At most twelve verified afterimages may coexist. They can be
+              inspected, exported, or erased together.
+            </p>
+          </div>
+        </div>
+
+        <div class="afterimage-workbench">
+          <form id="afterimage-form" class="afterimage-form">
+            <label for="afterimage-reflection">What remains with you?</label>
+            <textarea
+              id="afterimage-reflection"
+              name="reflection"
+              rows="4"
+              minlength="1"
+              maxlength="160"
+              placeholder="A short attributed reflection, written by you."
+            ></textarea>
+            <label class="afterimage-consent">
+              <input id="afterimage-consent" type="checkbox">
+              <span>Store this reflection on this device only.</span>
+            </label>
+            <button
+              id="remember-afterimage"
+              class="primary-button"
+              type="submit"
+              disabled
+            >
+              Remember this encounter
+              <span aria-hidden="true">→</span>
+            </button>
+            <p id="afterimage-form-status" class="afterimage-status">
+              Complete all five movements before leaving an afterimage.
+            </p>
+          </form>
+
+          <div class="afterimage-archive" aria-labelledby="afterimage-archive-title">
+            <div class="afterimage-archive-heading">
+              <div>
+                <p class="stage-kicker">This browser profile</p>
+                <h3 id="afterimage-archive-title">Verified local archive</h3>
+              </div>
+              <output id="afterimage-count" aria-label="Stored afterimages">0 / 12</output>
+            </div>
+            <p id="afterimage-archive-status" class="afterimage-status" role="status">
+              Reading the local archive…
+            </p>
+            <ol id="afterimage-list" class="afterimage-list"></ol>
+            <div class="afterimage-archive-actions">
+              <button id="export-afterimages" type="button" disabled>
+                Export archive
+              </button>
+              <button id="erase-afterimages" type="button" disabled>
+                Erase all local afterimages
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="closing-note">
         <p class="eyebrow">The boundary</p>
         <blockquote>
@@ -256,12 +341,13 @@
     </main>
 
     <footer>
-      <span>Consciousness Mesh · Restoration phase V · Private exhibition build</span>
+      <span>Consciousness Mesh · Restoration phase VI · Private exhibition build</span>
       <nav aria-label="Project documents">
         <a href="./docs/CURATORIAL-STATEMENT.md">Curatorial statement</a>
         <a href="./docs/EXHIBITION-GUIDE.md">Operator guide</a>
         <a href="./docs/ACCESSIBILITY-AUDIT.md">Accessibility</a>
         <a href="./docs/ART-SPEC.md">Art specification</a>
+        <a href="./docs/AFTERIMAGE-PROTOCOL.md">Afterimage protocol</a>
         <a href="./docs/MEMORY-PROTOCOL.md">Memory protocol</a>
         <a href="./docs/SECURE-SESSION-PROTOCOL.md">Session protocol</a>
         <a href="./docs/TRANSPORT-THREAT-MODEL.md">Threat model</a>

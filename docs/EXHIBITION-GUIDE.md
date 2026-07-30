@@ -65,6 +65,25 @@ the tab does not resume without an explicit action.
 7. Provide a keyboard or equivalent switch input within reach.
 8. Keep the curatorial statement and accessibility notes available nearby.
 
+## Afterimage on a shared installation
+
+Afterimage is enabled in the private build. A visitor can store a short
+reflection only after completing all five movements and confirming that the
+text will remain in the current browser profile. Later visitors on that profile
+may see the newest verified reflection as a prior local echo.
+
+Before opening:
+
+1. decide whether continuity between visitors is appropriate for the venue;
+2. explain that reflections are visible on the shared installation;
+3. do not invite secrets or identifying personal information;
+4. use **Export archive** if the venue needs a consensual record;
+5. use **Erase all local afterimages** before changing audiences or contexts
+   where continuity would be misleading.
+
+The archive is not encrypted, moderated, synchronized, or used as simulation
+input. See the [Afterimage protocol](./AFTERIMAGE-PROTOCOL.md).
+
 ## Recovery
 
 - If the browser becomes hidden, return and press Space or the resume button.
